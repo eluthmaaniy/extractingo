@@ -11,6 +11,8 @@ Frontend-only static SPA. No database, no Supabase, no auth.
 | Coolify | `https://coolify.uipostutme.com` — project **Extractingo** only |
 | Build pack | **Railpack**, static `dist/`, port **80** |
 | Git | `eluthmaaniy/extractingo` branch `main` |
+| Coolify project UUID | `3f3pm0b7dpjrt8onjxdwslkv` |
+| Coolify app UUID | `blywlej8ow3fzbavvgqeaftx` |
 
 Do not attach this hostname to the Scoutier SPA container. Do not add Postgres or a Docker network shared with Scoutier / Shopidict / Eltemur.
 
@@ -25,11 +27,14 @@ Dev server: `http://localhost:8080`. Confirm extract, Gmail-only, copy/download,
 
 ## Coolify
 
-1. Create Coolify project **Extractingo** (own project, like Eltemur).
-2. Application from GitHub, **Railpack**, publish directory `dist`, port `80`, SPA `try_files` from `nginx/spa.conf`.
-3. DNS: `A extractingo.scoutier.com.ng → 147.93.85.240`.
-4. Let’s Encrypt on that hostname.
-5. Push `main` to deploy. Use **Deploy**, not only Restart, after nginx changes.
+Project **Extractingo** and app `extractingo` already exist (Railpack, `/dist`, port 80). Do not attach this hostname to the Scoutier SPA.
+
+**Before the first Deploy:**
+
+1. DNS: `A extractingo.scoutier.com.ng → 147.93.85.240` on the Scoutier zone.
+2. Connect the GitHub repo to a Coolify GitHub App (the app was created from a public Git URL; a private repo needs `coolify-scoutier` or a dedicated Extractingo GitHub App, same pattern as Eltemur).
+3. In Coolify, paste `nginx/spa.conf` as custom Nginx, **Save**, then **Deploy** (Restart is not enough).
+4. Let’s Encrypt on `extractingo.scoutier.com.ng`.
 
 ## Family comparison
 
