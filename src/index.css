@@ -58,6 +58,7 @@
     --live: 28 92% 54%;
     --warning: 24 92% 50%;
     --info: 200 90% 36%;
+    color-scheme: light;
   }
 
   .dark {
@@ -87,6 +88,7 @@
     --live: 28 88% 58%;
     --warning: 24 90% 58%;
     --info: 198 93% 60%;
+    color-scheme: dark;
   }
 }
 
@@ -101,6 +103,15 @@
 }
 
 @layer utilities {
+  #tool {
+    scroll-margin-top: 1rem;
+  }
+
+  .skip-link {
+    @apply sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[60];
+    @apply focus:rounded-lg focus:bg-primary focus:px-3 focus:py-2 focus:text-sm focus:font-medium focus:text-primary-foreground;
+  }
+
   ::-webkit-scrollbar { width: 4px; height: 4px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb {

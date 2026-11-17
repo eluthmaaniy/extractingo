@@ -4,41 +4,109 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#F9FAFB" />
-    <title>Extractingo — Email & URL extractor</title>
+    <meta name="color-scheme" content="light dark" />
+    <title>Free Email Extractor, Duplicate Remover &amp; URL Extractor | Extractingo</title>
     <meta
       name="description"
-      content="Free Scoutier tool to extract, separate, clean, and chunk email and URL lists in the browser. No sign-up."
+      content="Extract emails and URLs from text, CSV, or PDF. Separate Gmail from business domains, remove duplicates, and split large lists. Free, in your browser — nothing is uploaded."
     />
-    <meta name="author" content="Scoutier" />
+    <meta
+      name="keywords"
+      content="email extractor, extract emails from pdf, extract emails from text, extract emails from csv, free email extractor, email list cleaner, remove duplicate emails, split email list, gmail extractor, separate gmail from business emails, url extractor, extract urls from text, outreach list cleaner, lead list cleaner, crm email import, large email list"
+    />
+    <meta name="author" content="Extractingo, a Scoutier product" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="googlebot" content="index, follow" />
+    <meta name="bingbot" content="index, follow" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
     <link rel="canonical" href="https://extractingo.scoutier.com.ng/" />
-    <meta property="og:title" content="Extractingo — Email & URL extractor" />
+    <link rel="alternate" hreflang="en" href="https://extractingo.scoutier.com.ng/" />
+    <meta property="og:title" content="Free Email Extractor, Duplicate Remover &amp; URL Extractor | Extractingo" />
     <meta
       property="og:description"
-      content="Extract, separate, clean, and chunk email and URL lists. A free Scoutier product."
+      content="Extract emails and URLs from text, CSV, or PDF. Separate Gmail from business domains, remove duplicates, and split large lists. Free, in your browser — nothing is uploaded."
     />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://extractingo.scoutier.com.ng/" />
     <meta property="og:site_name" content="Extractingo" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:image" content="https://res.cloudinary.com/dib5bkbsy/image/upload/v1789347595/scoutier-logo_bvt9ap.png" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Free Email Extractor, Duplicate Remover &amp; URL Extractor | Extractingo" />
+    <meta
+      name="twitter:description"
+      content="Extract emails and URLs from text, CSV, or PDF. Separate Gmail from business domains, remove duplicates, and split large lists. Free, in your browser."
+    />
+    <meta name="twitter:image" content="https://res.cloudinary.com/dib5bkbsy/image/upload/v1789347595/scoutier-logo_bvt9ap.png" />
+    <meta name="application-name" content="Extractingo" />
+    <meta name="apple-mobile-web-app-title" content="Extractingo" />
     <link rel="icon" type="image/png" href="https://res.cloudinary.com/dib5bkbsy/image/upload/v1789347595/scoutier-logo_bvt9ap.png" />
-    <link rel="preload" href="/fonts/scoutier-sans.v3.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="apple-touch-icon" href="https://res.cloudinary.com/dib5bkbsy/image/upload/v1789347595/scoutier-logo_bvt9ap.png" />
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.9.0/fonts/remixicon.css" rel="stylesheet" />
     <style>
-      html { background-color: #F9FAFB; }
+      html { background-color: #F9FAFB; color-scheme: light; }
       body { background-color: #F9FAFB; margin: 0; }
-      html.dark, html.dark body { background-color: #17191C; }
+      html.dark, html.dark body { background-color: #17191C; color-scheme: dark; }
     </style>
     <script>
-      try {
-        if (localStorage.getItem('extractingo-theme') === 'dark') {
-          document.documentElement.classList.add('dark');
-          document.querySelector('meta[name="theme-color"]')?.setAttribute('content', '#17191C');
-        }
-      } catch (e) { /* ignore */ }
+      (function () {
+        try {
+          var pref = localStorage.getItem('extractingo-theme') || 'system';
+          var dark = pref === 'dark' || (pref !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+          if (dark) {
+            document.documentElement.classList.add('dark');
+            var meta = document.querySelector('meta[name="theme-color"]');
+            if (meta) meta.setAttribute('content', '#17191C');
+          }
+          document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+        } catch (e) { /* ignore */ }
+      })();
     </script>
   </head>
   <body>
     <div id="root"></div>
+    <noscript>
+      <main>
+        <h1>Extractingo — free email extractor, URL extractor, and list cleaner</h1>
+        <p>
+          Extract emails and URLs from text, CSV, PDF, or Word. Separate Gmail from business domains, remove duplicate
+          emails, and split large lists. Everything runs in your browser. Nothing is uploaded. No Scoutier account required.
+        </p>
+        <h2>Tools</h2>
+        <ul>
+          <li>Email extractor and separator — personal inboxes vs business domains</li>
+          <li>URL extractor — clean http(s) links only, no surrounding words</li>
+          <li>Duplicate remover — case-insensitive unique lists</li>
+          <li>List splitter — cut a finished list into segments</li>
+        </ul>
+        <h2>Who this is for</h2>
+        <p>
+          Outbound and lead generation, sales ops, virtual assistants, list brokers, researchers pulling contacts from
+          documents, newsletter operators, recruiters, event teams, and anyone cleaning CRM imports or large email files.
+        </p>
+        <h2>FAQ</h2>
+        <h3>How do I extract email addresses from a PDF or Word file?</h3>
+        <p>Drop a .pdf, .docx, .txt, or .csv onto Extractingo, or paste the text. The Emails tool finds every address in the file. Extraction runs in your browser — the file is not uploaded to a server.</p>
+        <h3>Does Extractingo upload my email list?</h3>
+        <p>No. Extractingo is a free, client-side tool. Lists, PDFs, and results stay in this browser until you clear them. There is no account and no server-side processing.</p>
+        <h3>Will I lose my list if I refresh or close the tab?</h3>
+        <p>No. The current list and results are saved in this browser so a refresh or sudden close does not wipe them. Use Clear or Remove to delete the saved list. If you drop a new file while one is already here, the new file replaces the old one — the two are not merged.</p>
+        <h3>How do I separate Gmail from business emails?</h3>
+        <p>Open Emails, extract, then use the Personal bucket. Choose Gmail only, Yahoo, Outlook, or all personal inboxes. Company domains land in Business / other.</p>
+        <h3>How do I remove duplicate emails from a list?</h3>
+        <p>Open Clean, paste one email per line, and run Remove duplicates. Matches are case-insensitive. Download the unique list as .txt or .csv.</p>
+        <h3>How do I split a large email list into smaller files?</h3>
+        <p>Open Split, paste a finished list (one email per line), set emails per segment, and run Split list. Copy or download each segment for outreach, CRM import, or sending tools.</p>
+        <h3>Can I extract URLs from messy text?</h3>
+        <p>Yes. The URLs tool keeps only the http(s) link itself — no surrounding words or punctuation. It is built for large pastes, crawls, and documents.</p>
+        <h3>Who is Extractingo for?</h3>
+        <p>Anyone who works with large email or URL lists: outbound and lead generation, sales ops, virtual assistants, list brokers, researchers pulling contacts from documents, newsletter operators, recruiters, event teams, and people cleaning CRM imports. You do not need a Scoutier account.</p>
+        <h3>Is Extractingo free?</h3>
+        <p>Yes. Every tool is free: email extractor, URL extractor, duplicate remover, and list splitter. No sign-up.</p>
+        <p>© Extractingo. All rights reserved. A Scoutier product.</p>
+      </main>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

@@ -1,6 +1,6 @@
 export const EMAIL_REGEX = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
-export const URL_REGEX =
-  /https?:\/\/(www\.)?([a-zA-Z0-9.-]+)(\/[a-zA-Z0-9._~:/?#[\]@!$&'()*+,;=-]*)?/g;
+/** Full http(s) URLs only. Stops at whitespace and quotes so nearby words are never captured. */
+export const URL_FIND_REGEX = /https?:\/\/[^\s<>"'`]+/gi;
 
 export const PERSONAL_DOMAINS = new Set([
   "gmail.com",
@@ -24,16 +24,28 @@ export const PERSONAL_DOMAINS = new Set([
 export type PersonalFilter = "all" | "gmail" | "yahoo" | "outlook";
 
 export const DEFAULT_CHUNK_SIZE = 5000;
-export const MAX_DISPLAY = 500;
-export const LARGE_INPUT_THRESHOLD = 150_000;
-export const TEXTAREA_PREVIEW_CAP = 100_000;
+export const MAX_DISPLAY = 400;
+export const LARGE_INPUT_THRESHOLD = 120_000;
+export const TEXTAREA_PREVIEW_CAP = 80_000;
 const DOWNLOAD_LINE_CHUNK = 8_000;
 const CLASSIFY_BATCH = 8_000;
-const SPLIT_YIELD_CHARS = 200_000;
-const EXTRACT_CHUNK = 200_000;
+const SPLIT_YIELD_CHARS = 120_000;
+const EXTRACT_CHUNK = 80_000;
+const EMAIL_OVERLAP = 256;
+const URL_OVERLAP = 2048;
 
 export function yieldToMain(): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, 0));
+  const sched = (globalThis as { scheduler?: { yield?: () => Promise<void> } }).scheduler;
+  if (sched?.yield) return sched.yield();
+  return new Promise((resolve) => {
+    if (typeof MessageChannel !== "undefined") {
+      const ch = new MessageChannel();
+      ch.port2.onmessage = () => resolve();
+      ch.port1.postMessage(null);
+    } else {
+      setTimeout(resolve, 0);
+    }
+  });
 }
 
 export function emailDomain(email: string): string {
@@ -52,6 +64,33 @@ export function matchesPersonalFilter(email: string, filter: PersonalFilter): bo
   return domain === "outlook.com" || domain === "hotmail.com" || domain === "live.com" || domain === "msn.com";
 }
 
+const TRAILING_URL_JUNK = /[),.;:!?\]\}>'"]+$/g;
+
+/** Drop surrounding punctuation so a sentence never sticks to the URL. */
+export function cleanUrl(raw: string): string | null {
+  let s = raw.trim().replace(TRAILING_URL_JUNK, "");
+  while (s.endsWith(")") && (s.split(")").length - 1) > (s.split("(").length - 1)) {
+    s = s.slice(0, -1);
+  }
+  let parsed: URL;
+  try {
+    parsed = new URL(s);
+  } catch {
+    return null;
+  }
+  if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return null;
+  const host = parsed.hostname.toLowerCase();
+  if (!host.includes(".") && host !== "localhost") return null;
+  if (host.startsWith(".") || host.endsWith(".")) return null;
+
+  const auth = parsed.username
+    ? `${encodeURIComponent(parsed.username)}${parsed.password ? `:${encodeURIComponent(parsed.password)}` : ""}@`
+    : "";
+  const port = parsed.port ? `:${parsed.port}` : "";
+  const path = parsed.pathname === "/" && !parsed.search && !parsed.hash ? "" : parsed.pathname;
+  return `${parsed.protocol}//${auth}${host}${port}${path}${parsed.search}${parsed.hash}`;
+}
+
 export async function extractEmailsChunked(
   text: string,
   unique: boolean,
@@ -62,22 +101,24 @@ export async function extractEmailsChunked(
   const len = text.length || 1;
 
   for (let i = 0; i < text.length; i += EXTRACT_CHUNK) {
-    const chunk = text.slice(i, Math.min(i + EXTRACT_CHUNK + 200, text.length));
-    const matches = chunk.match(EMAIL_REGEX);
-    if (matches) {
-      for (const raw of matches) {
-        const email = raw.toLowerCase();
-        if (unique) {
-          if (!seen.has(email)) {
-            seen.add(email);
-            results.push(email);
-          }
-        } else {
+    const sliceEnd = Math.min(i + EXTRACT_CHUNK + EMAIL_OVERLAP, text.length);
+    const slice = text.slice(i, sliceEnd);
+    const re = new RegExp(EMAIL_REGEX.source, "g");
+    let match: RegExpExecArray | null;
+    while ((match = re.exec(slice)) !== null) {
+      const abs = i + match.index;
+      if (abs >= i + EXTRACT_CHUNK && i + EXTRACT_CHUNK < text.length) continue;
+      const email = match[0].toLowerCase();
+      if (unique) {
+        if (!seen.has(email)) {
+          seen.add(email);
           results.push(email);
         }
+      } else {
+        results.push(email);
       }
     }
-    onProgress?.(Math.min(100, Math.round(((i + EXTRACT_CHUNK) / len) * 100)));
+    onProgress?.(Math.min(99, Math.round(((i + EXTRACT_CHUNK) / len) * 100)));
     await yieldToMain();
   }
   onProgress?.(100);
@@ -86,23 +127,37 @@ export async function extractEmailsChunked(
 
 export async function extractUrlsChunked(
   text: string,
+  unique = true,
   onProgress?: (pct: number) => void,
 ): Promise<string[]> {
   const seen = new Set<string>();
+  const results: string[] = [];
   const len = text.length || 1;
 
   for (let i = 0; i < text.length; i += EXTRACT_CHUNK) {
-    const chunk = text.slice(i, Math.min(i + EXTRACT_CHUNK + 500, text.length));
-    const re = new RegExp(URL_REGEX.source, "g");
+    const sliceEnd = Math.min(i + EXTRACT_CHUNK + URL_OVERLAP, text.length);
+    const slice = text.slice(i, sliceEnd);
+    const re = new RegExp(URL_FIND_REGEX.source, "gi");
     let match: RegExpExecArray | null;
-    while ((match = re.exec(chunk)) !== null) {
-      seen.add(match[2].toLowerCase());
+    while ((match = re.exec(slice)) !== null) {
+      const abs = i + match.index;
+      if (abs >= i + EXTRACT_CHUNK && i + EXTRACT_CHUNK < text.length) continue;
+      const url = cleanUrl(match[0]);
+      if (!url) continue;
+      if (unique) {
+        if (!seen.has(url)) {
+          seen.add(url);
+          results.push(url);
+        }
+      } else {
+        results.push(url);
+      }
     }
-    onProgress?.(Math.min(100, Math.round(((i + EXTRACT_CHUNK) / len) * 100)));
+    onProgress?.(Math.min(99, Math.round(((i + EXTRACT_CHUNK) / len) * 100)));
     await yieldToMain();
   }
   onProgress?.(100);
-  return Array.from(seen);
+  return results;
 }
 
 export async function splitEmailsPersonalDomainChunked(
@@ -168,17 +223,20 @@ export function downloadLinesAsFile(lines: string[], filename: string, mime = "t
   URL.revokeObjectURL(url);
 }
 
-export function toCsvLines(lines: string[]): string[] {
-  return ["email", ...lines.map((line) => (/[",\n]/.test(line) ? `"${line.replace(/"/g, '""')}"` : line))];
+export function toCsvLines(lines: string[], column = "value"): string[] {
+  return [column, ...lines.map((line) => (/[",\n]/.test(line) ? `"${line.replace(/"/g, '""')}"` : line))];
 }
 
-export async function splitLinesTrimmedChunked(text: string): Promise<string[]> {
+export async function splitLinesTrimmedChunked(
+  text: string,
+  onProgress?: (pct: number) => void,
+): Promise<string[]> {
   const lines: string[] = [];
-  const len = text.length;
+  const len = text.length || 1;
   let start = 0;
   let sinceYield = 0;
-  for (let i = 0; i <= len; i++) {
-    if (i === len || text[i] === "\n") {
+  for (let i = 0; i <= text.length; i++) {
+    if (i === text.length || text[i] === "\n") {
       const line = text.slice(start, i).trim();
       if (line) lines.push(line);
       start = i + 1;
@@ -186,8 +244,37 @@ export async function splitLinesTrimmedChunked(text: string): Promise<string[]> 
     sinceYield++;
     if (sinceYield >= SPLIT_YIELD_CHARS) {
       sinceYield = 0;
+      onProgress?.(Math.min(99, Math.round((i / len) * 100)));
       await yieldToMain();
     }
   }
+  onProgress?.(100);
   return lines;
+}
+
+export async function deduplicateChunked(
+  lines: string[],
+  onProgress?: (pct: number) => void,
+): Promise<string[]> {
+  if (lines.length === 0) {
+    onProgress?.(100);
+    return [];
+  }
+  const BATCH = 40_000;
+  const seen = new Set<string>();
+  const unique: string[] = [];
+  for (let i = 0; i < lines.length; i += BATCH) {
+    const batch = lines.slice(i, i + BATCH);
+    for (const line of batch) {
+      const key = line.toLowerCase();
+      if (!seen.has(key)) {
+        seen.add(key);
+        unique.push(line);
+      }
+    }
+    onProgress?.(Math.min(100, Math.round(((i + BATCH) / lines.length) * 100)));
+    await yieldToMain();
+  }
+  onProgress?.(100);
+  return unique;
 }

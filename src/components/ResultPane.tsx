@@ -9,11 +9,13 @@ export function ResultPane({
   lines,
   fileSlug,
   chunkSize,
+  csvColumn = "value",
 }: {
   title: string;
   lines: string[];
   fileSlug: string;
   chunkSize: number;
+  csvColumn?: string;
 }) {
   const size = Math.max(1, chunkSize || DEFAULT_CHUNK_SIZE);
   const chunks = useMemo(() => chunkList(lines, size), [lines, size]);
@@ -23,7 +25,7 @@ export function ResultPane({
   if (lines.length === 0) {
     return (
       <div className="rounded-xl border border-dashed border-border/70 bg-muted/20 px-4 py-8 text-center text-sm text-muted-foreground">
-        No {title.toLowerCase()} in this bucket.
+        Nothing here. Try another filter, or paste a different file.
       </div>
     );
   }
@@ -46,7 +48,7 @@ export function ResultPane({
             <i className="ri-download-line" aria-hidden />
             .txt
           </Button>
-          <Button variant="outline" size="sm" onClick={() => downloadCsv(lines, `${fileSlug}.csv`)}>
+          <Button variant="outline" size="sm" onClick={() => downloadCsv(lines, `${fileSlug}.csv`, csvColumn)}>
             <i className="ri-file-excel-2-line" aria-hidden />
             .csv
           </Button>

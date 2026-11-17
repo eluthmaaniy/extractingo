@@ -3,3 +3,8 @@ export const SCOUTIER_LOGO_URL =
 
 export const SCOUTIER_SITE_URL = "https://scoutier.com.ng";
 export const EXTRACTINGO_SITE_URL = "https://extractingo.scoutier.com.ng";
+export const COPYRIGHT_NAME = "Extractingo";
+
+export function copyrightYear(now = new Date()): number {
+  return now.getFullYear();
+}

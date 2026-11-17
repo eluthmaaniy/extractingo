@@ -27,11 +27,11 @@ export function downloadTxt(lines: string[], filename: string) {
   toast.success("Download started");
 }
 
-export function downloadCsv(lines: string[], filename: string) {
+export function downloadCsv(lines: string[], filename: string, column = "value") {
   if (lines.length === 0) {
     toast.error("Nothing to download");
     return;
   }
-  downloadLinesAsFile(toCsvLines(lines), filename, "text/csv");
+  downloadLinesAsFile(toCsvLines(lines, column), filename, "text/csv");
   toast.success("CSV download started");
 }

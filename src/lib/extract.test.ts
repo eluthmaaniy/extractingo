@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   chunkList,
+  cleanUrl,
   emailDomain,
   extractEmailsChunked,
   extractUrlsChunked,
@@ -34,11 +35,27 @@ describe("extract", () => {
     expect(filterPersonal(personal, "all")).toEqual(personal);
   });
 
-  it("extracts unique hostnames", async () => {
+  it("extracts only the URL, never surrounding words", async () => {
     const urls = await extractUrlsChunked(
-      "See https://www.Example.com/a and http://example.com/b https://other.org",
+      "Please visit https://www.Example.com/pricing today and also http://other.org/docs. Thanks!",
     );
-    expect(urls.sort()).toEqual(["example.com", "other.org"]);
+    expect(urls).toEqual(["https://www.example.com/pricing", "http://other.org/docs"]);
+  });
+
+  it("strips trailing punctuation from URLs", async () => {
+    const urls = await extractUrlsChunked("Go to https://acme.io/a), then https://acme.io/b.");
+    expect(urls).toEqual(["https://acme.io/a", "https://acme.io/b"]);
+  });
+
+  it("does not treat plain words as URLs", async () => {
+    const urls = await extractUrlsChunked("contact sales at hello world example.com not a link");
+    expect(urls).toEqual([]);
+  });
+
+  it("cleanUrl rejects junk", () => {
+    expect(cleanUrl("https://ok.com/path")).toBe("https://ok.com/path");
+    expect(cleanUrl("ftp://ok.com")).toBeNull();
+    expect(cleanUrl("https://localhost/app")).toBe("https://localhost/app");
   });
 
   it("chunks with a default-safe size", () => {

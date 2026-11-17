@@ -1,10 +1,10 @@
 import type { ComponentProps } from "react";
 import { Toaster as Sonner } from "sonner";
-import type { Theme } from "@/lib/theme";
+import type { ResolvedTheme } from "@/lib/theme";
 
 type ToasterProps = ComponentProps<typeof Sonner>;
 
-export function Toaster({ theme }: { theme: Theme }) {
+export function Toaster({ theme }: { theme: ResolvedTheme }) {
   return (
     <Sonner
       theme={theme as ToasterProps["theme"]}
