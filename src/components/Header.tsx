@@ -10,7 +10,7 @@ export function Header({
   onCycleTheme: () => void;
 }) {
   return (
-    <header className="relative z-[45] border-b border-border/60 bg-card/95 px-5 py-3 backdrop-blur-sm md:px-6">
+    <header className="relative z-[45] border-b border-border/60 bg-card/95 px-4 py-3 backdrop-blur-sm sm:px-5 md:px-6 pt-[max(0.75rem,env(safe-area-inset-top))]">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
           <img src={SCOUTIER_LOGO_URL} alt="" className="h-6 w-6 shrink-0" width={24} height={24} />

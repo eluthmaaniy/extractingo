@@ -81,7 +81,7 @@ export function ResultPane({
         </div>
       )}
 
-      <pre className="max-h-[46vh] overflow-auto rounded-xl border border-border/70 bg-muted/40 p-3 font-mono text-xs leading-5 text-foreground">
+      <pre className="max-h-[46vh] overflow-auto whitespace-pre-wrap break-all rounded-xl border border-border/70 bg-muted/40 p-3 font-mono text-xs leading-5 text-foreground">
         {displayText(active.length ? active : lines)}
       </pre>
     </div>

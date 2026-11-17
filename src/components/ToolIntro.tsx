@@ -38,11 +38,11 @@ export function ToolIntro({ mode }: { mode: WorkspaceMode }) {
         <h2 className="text-lg font-bold tracking-tight text-foreground">{copy.title}</h2>
         <p className="text-sm leading-relaxed text-muted-foreground">{copy.tagline}</p>
       </div>
-      <ol className="flex flex-wrap gap-2">
+      <ol className="flex max-w-full flex-wrap gap-2">
         {copy.steps.map((step, index) => (
           <li
             key={step}
-            className="inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-muted/40 px-2.5 py-1 text-xs text-muted-foreground"
+            className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-border/70 bg-muted/40 px-2.5 py-1.5 text-xs leading-snug text-muted-foreground"
           >
             <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-primary/10 text-[10px] font-semibold text-primary">
               {index + 1}

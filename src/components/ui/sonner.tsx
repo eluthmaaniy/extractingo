@@ -9,10 +9,13 @@ export function Toaster({ theme }: { theme: ResolvedTheme }) {
     <Sonner
       theme={theme as ToasterProps["theme"]}
       className="toaster group"
+      position="top-center"
+      offset={16}
+      visibleToasts={2}
       toastOptions={{
         classNames: {
           toast:
-            "group toast group-[.toaster]:bg-background group-[.toaster]:text-foreground group-[.toaster]:border-border group-[.toaster]:shadow-lg",
+            "group toast w-[min(100%,22rem)] group-[.toaster]:bg-background group-[.toaster]:text-foreground group-[.toaster]:border-border group-[.toaster]:shadow-lg",
           description: "group-[.toast]:text-muted-foreground",
           actionButton: "group-[.toaster]:bg-primary group-[.toaster]:text-primary-foreground",
           cancelButton: "group-[.toaster]:bg-muted group-[.toaster]:text-muted-foreground",

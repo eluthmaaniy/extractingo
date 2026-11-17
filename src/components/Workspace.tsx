@@ -402,7 +402,7 @@ export function Workspace() {
   }
 
   return (
-    <section id="tool" className="gmail-card-static space-y-5 p-4 sm:p-6">
+    <section id="tool" className="gmail-card-static space-y-4 p-3.5 sm:space-y-5 sm:p-6">
       <ModeSwitcher value={mode} onChange={setMode} />
       <ToolIntro mode={mode} />
 
@@ -443,7 +443,7 @@ export function Workspace() {
             <i className="ri-upload-2-line text-lg" aria-hidden />
           </span>
           <span className="text-sm font-medium text-foreground">{drop.title}</span>
-          <span className="text-xs text-muted-foreground">{drop.subtitle}</span>
+          <span className="max-w-[38ch] text-xs leading-relaxed text-muted-foreground">{drop.subtitle}</span>
           <Input
             type="file"
             accept={ACCEPTED_EXTENSIONS}
@@ -462,7 +462,7 @@ export function Workspace() {
 
       <div className="space-y-1.5">
         <Textarea
-          className="min-h-[140px] bg-card font-mono text-xs dark:bg-card"
+          className="min-h-[140px] bg-card font-mono text-base dark:bg-card sm:text-xs"
           placeholder={PLACEHOLDERS[mode]}
           value={text}
           readOnly={bulkActive}
@@ -512,12 +512,13 @@ export function Workspace() {
               </button>
             ))}
           </div>
-          <label className="flex items-center gap-2 text-sm text-muted-foreground">
+          <label className="flex w-full flex-col gap-1.5 text-sm text-muted-foreground sm:flex-row sm:items-center sm:gap-2">
             Emails per result chunk
             <Input
               type="number"
               min={1}
-              className="h-9 w-28"
+              inputMode="numeric"
+              className="h-11 w-full sm:h-9 sm:w-28"
               value={chunkSize}
               onChange={(e) => setChunkSize(Math.max(1, Number(e.target.value) || DEFAULT_CHUNK_SIZE))}
             />
@@ -537,20 +538,21 @@ export function Workspace() {
       )}
 
       {mode === "segment" && (
-        <label className="flex items-center gap-2 text-sm text-muted-foreground">
+        <label className="flex w-full flex-col gap-1.5 text-sm text-muted-foreground sm:flex-row sm:items-center sm:gap-2">
           Emails per segment
           <Input
             type="number"
             min={1}
-            className="h-9 w-28"
+            inputMode="numeric"
+            className="h-11 w-full sm:h-9 sm:w-28"
             value={chunkSize}
             onChange={(e) => setChunkSize(Math.max(1, Number(e.target.value) || DEFAULT_CHUNK_SIZE))}
           />
         </label>
       )}
 
-      <div className="flex flex-col gap-2 sm:flex-row">
-        <Button className="gmail-btn sm:flex-1" onClick={() => void run()} disabled={processing}>
+      <div className="flex gap-2">
+        <Button className="gmail-btn min-w-0 flex-1" onClick={() => void run()} disabled={processing}>
           {processing ? (
             <>
               <i className="ri-loader-4-line animate-spin" aria-hidden />
@@ -564,7 +566,7 @@ export function Workspace() {
           )}
         </Button>
         {hasSource && (
-          <Button type="button" variant="outline" className="h-11 rounded-full sm:w-28" onClick={clear} disabled={processing}>
+          <Button type="button" variant="outline" className="h-11 shrink-0 rounded-full px-4 sm:w-28" onClick={clear} disabled={processing}>
             Clear
           </Button>
         )}
@@ -594,7 +596,7 @@ export function Workspace() {
 
       {done && !processing && mode === "emails" && (
         <div className="space-y-4 pt-1">
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <button
               type="button"
               className={cn("field-chip", bucket === "personal" && "field-chip-active")}

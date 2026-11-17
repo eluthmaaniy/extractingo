@@ -37,7 +37,7 @@ export default function App() {
         Skip to tools
       </a>
       <Header preference={preference} onCycleTheme={() => setPreference((current) => nextPreference(current))} />
-      <main className="container mx-auto px-4 py-5 sm:px-5 md:py-6">
+      <main className="container mx-auto px-3 py-4 sm:px-5 sm:py-5 md:py-6">
         <div className="mx-auto max-w-3xl space-y-5">
           <PageIntro />
           <Workspace />

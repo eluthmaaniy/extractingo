@@ -15,11 +15,11 @@ export function SessionBanner({
     <div className="flex flex-col gap-3 rounded-xl border border-border/70 bg-muted/30 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
       <div className="min-w-0 space-y-1">
         <p className="text-sm font-medium text-foreground">Saved in this browser · {formatSavedAgo(updatedAt)}</p>
-        <p className="text-xs leading-relaxed text-muted-foreground">
+        <p className="break-words text-xs leading-relaxed text-muted-foreground">
           {names}. New files replace this list — they are not merged. Nothing is uploaded.
         </p>
       </div>
-      <Button type="button" variant="outline" size="sm" className="shrink-0 rounded-full" onClick={onRemove}>
+      <Button type="button" variant="outline" size="sm" className="h-10 w-full shrink-0 rounded-full sm:h-9 sm:w-auto" onClick={onRemove}>
         <i className="ri-delete-bin-line" aria-hidden />
         Remove
       </Button>
