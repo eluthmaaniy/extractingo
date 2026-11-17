@@ -1,0 +1,1260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google tag (gtag.js) -->
+		<script async src="https://www.googletagmanager.com/gtag/js?id=G-LCT9JGKKYQ"></script>
+		<script>
+			window.dataLayer = window.dataLayer || [];
+
+			function gtag() {
+				dataLayer.push(arguments);
+			}
+			gtag('js', new Date());
+			gtag('config', 'G-LCT9JGKKYQ');
+		</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <meta name="description" content="Extractingo is an Email and Url Extractor tool website. Extract, Separate, Segment and Remove duplicates emails from your list or leads.">
+		<meta name="keywords" content="email extractor, email segmentor, email duplicates remover">
+		<meta name="author" content="El Uthmaaniy">
+		<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+
+		<!-- Additional meta tags can be added as needed for SEO and other purposes -->
+
+		<!-- Meta Graphs -->
+		<meta property="og:title" content="Extractingo - Email Extractor Tool">
+		<meta property="og:description" content="Extractingo is a website to filter, segment and extract email address from texts and files.">
+		<meta property="og:image" content="path/to/your/image.jpg">
+		<meta property="og:url" content="https://www.extractingo.blogspot.com">
+		<meta property="og:type" content="website">
+		<meta property="og:site_name" content="Extractingo">
+		<meta property="og:locale" content="en_US">  
+    
+  <title>Extractingo</title>
+  
+  <!-- Google Sans Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:ital,wght@0,400;0,500;0,700;1,400;1,500;1,700&display=swap" rel="stylesheet">
+  
+  <!-- Remix Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css"/>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            'google-sans': ['Google Sans', 'sans-serif'],
+          },
+          colors: {
+            'google-blue': '#4285F4',
+            'google-red': '#EA4335', 
+            'google-yellow': '#FBBC05',
+            'google-green': '#34A853',
+          }
+        }
+      },
+      darkMode: 'class'
+    }
+  </script>
+  
+  <style>
+    body {
+      font-family: 'Google Sans', sans-serif;
+      font-size: 11px;
+    }
+    
+    /* Dark mode transitions */
+    * {
+      transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    }
+    
+    /* Carousel animations */
+    .carousel-item {
+      display: none;
+      text-align: center;
+    }
+    
+    .carousel-item.active {
+      display: block;
+      animation: slideIn 5s ease infinite;
+    }
+    
+    @keyframes slideIn {
+      0%, 100% { opacity: 0; }
+      10%, 90% { opacity: 1; }
+    }
+    
+    /* Email chunk styling */
+    .email-chunk {
+      border: 2px solid #4285F4;
+      padding: 20px;
+      margin-bottom: 20px;
+      background-color: #f8f9ff;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+    }
+    
+    .dark .email-chunk {
+      background-color: #1a1a2e;
+      border-color: #4285F4;
+    }
+    
+    textarea {
+      width: 100%;
+      height: 200px;
+      margin-top: 10px;
+      padding: 15px;
+      font-size: 14px;
+      background-color: #f8f9ff;
+      border: 2px solid #4285F4;
+      border-radius: 12px;
+      font-family: 'Google Sans', sans-serif;
+    }
+    
+    .dark textarea {
+      background-color: #2d2d44;
+      color: #ffffff;
+      border-color: #4285F4;
+    }
+    
+    /* Scrolling text animation */
+    .scrolling-text {
+      width: 100%;
+      overflow: hidden;
+    }
+    
+    .scrolling-text p {
+      animation: scroll-left 15s linear infinite;
+    }
+    
+    @keyframes scroll-left {
+      0% { transform: translateX(100%); }
+      100% { transform: translateX(-100%); }
+    }
+    
+    /* Custom button styles */
+    .btn-primary {
+      background: #4285F4;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    
+    .btn-primary:hover {
+      background: #3367d6;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(66, 133, 244, 0.3);
+    }
+    
+    .btn-secondary {
+      background: transparent;
+      color: #4285F4;
+      border: 2px solid #4285F4;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    
+    .btn-secondary:hover {
+      background: #4285F4;
+      color: white;
+      transform: translateY(-2px);
+    }
+    
+    /* Loading spinner */
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #4285F4;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    /* Save user preferences indicator */
+    .save-indicator {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #34A853;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      opacity: 0;
+      transform: translateY(-20px);
+      transition: all 0.3s ease;
+      z-index: 1000;
+    }
+    
+    .save-indicator.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+  <style>
+ #testimonialCarousel {
+  position: relative;
+  min-height: 250px; /* adjust to fit your tallest testimonial */
+}
+
+#testimonialCarousel .carousel-item {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+
+#testimonialCarousel .carousel-item:not(.active) {
+  opacity: 0;
+  pointer-events: none;
+}
+
+#testimonialCarousel .carousel-item.active {
+  opacity: 1;
+  pointer-events: auto;
+  position: relative; /* allows height to be measured */
+}
+</style>
+</head>
+
+<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-white transition-all duration-300">
+
+<!-- Save Indicator -->
+<div id="saveIndicator" class="save-indicator">
+  <i class="ri-save-line mr-1"></i>
+  Preferences saved
+</div>
+
+<!-- Header Section -->
+<header class="bg-white dark:bg-gray-800 py-4 shadow-lg border-b-4 border-google-blue">
+  <div class="container mx-auto flex justify-between items-center px-6">
+    <div class="text-3xl font-bold">
+      <span class="text-google-blue">Extrac</span><span class="text-google-green">tingo</span>
+    </div>
+    <nav class="space-x-6">
+        <a href="https://scoutier.com.ng" class="text-gray-500 dark:text-gray-300 hover:text-green-500">Scoutier</a>
+              
+        
+      </nav>
+    <nav class="hidden md:flex space-x-8">
+      <a href="#tools" class="text-gray-600 dark:text-gray-300 hover:text-google-blue transition-colors font-medium">Tools</a>
+      <a href="#testimonials" class="text-gray-600 dark:text-gray-300 hover:text-google-blue transition-colors font-medium">Reviews</a>
+      <a href="#contact" class="text-gray-600 dark:text-gray-300 hover:text-google-blue transition-colors font-medium">Contact</a>
+      <a href="https://scoutier.com.ng" class="text-gray-600 dark:text-gray-300 hover:text-google-blue transition-colors font-medium">Scoutier</a>
+    </nav>
+    <button id="darkModeToggle" class="text-google-yellow hover:text-google-red transition-colors p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+      <i class="ri-moon-line ri-2x hidden dark:block" id="darkIcon"></i>
+      <i class="ri-sun-line ri-2x block dark:hidden" id="lightIcon"></i>
+    </button>
+  </div>
+</header>
+
+<!-- Announcement Banner -->
+<section id="announcement" class="bg-google-yellow bg-opacity-20 text-google-red p-2 text-center flex items-center justify-center">
+  <i class="ri-volume-up-line mr-2 text-xl"></i>
+  <div class="scrolling-text whitespace-nowrap overflow-x-auto">
+    <p class="inline-block font-medium">🎉 Failed to copy to clipboard has been solved. Use the contact form to report any issue. Thanks!</p>
+  </div>
+</section>
+
+<!-- Hero Section -->
+<main class="text-center py-20 bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-800">
+  <div class="container mx-auto px-6">
+    <h1 class="text-5xl md:text-6xl font-bold mb-6">
+      Effortless <span id="dynamic-text" class="bg-google-blue text-white px-4 py-2 rounded-lg">Email</span>
+    </h1>
+    <p class="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto">
+      Easy tools to extract, segment, and manage your URL and Email lists with professional precision.
+    </p>
+    <div class="flex flex-col sm:flex-row justify-center gap-4 mb-8">
+      <button id="sign-up-free" class="btn-primary text-lg px-8 py-4">
+        <i class="ri-rocket-line mr-2"></i>Get Started Free
+      </button>
+      <button id="watch-demo" class="btn-secondary text-lg px-8 py-4">
+        <i class="ri-play-circle-line mr-2"></i>Watch Demo
+      </button>
+    </div>
+    <p class="text-sm text-gray-500 dark:text-gray-400">
+      <i class="ri-shield-check-line mr-1"></i>Free premium features | No credit card required
+    </p>
+  </div>
+</main>
+
+<!-- Tools Section -->
+<section id="tools" class="py-16">
+  
+  <!-- URL Extractor -->
+  <div class="container mx-auto px-6 mb-16">
+    <div class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl max-w-2xl mx-auto border-2 border-google-blue">
+      <h2 class="text-center text-3xl font-bold mb-4 text-google-blue">
+        <i class="ri-links-line mr-3"></i>URL Extractor
+      </h2>
+      <p class="text-center text-gray-600 dark:text-gray-300 mb-8">
+        Upload any file to extract URLs from it. Supported file types: PDF, DOCX, TXT, etc.
+      </p>
+      
+      <div class="bg-google-blue text-white text-center py-4 rounded-t-xl">
+        <h3 class="font-semibold text-lg">
+          <i class="ri-upload-cloud-line mr-2"></i>Upload File
+        </h3>
+      </div>
+      
+      <div class="border-2 border-google-blue border-t-0 p-6 rounded-b-xl">
+        <input id="url-file-input" type="file" class="block w-full text-sm text-gray-900 dark:text-gray-100 border-2 border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer focus:outline-none focus:border-google-blue bg-white dark:bg-gray-700 p-3" />
+      </div>
+      
+      <button id="extract-urls-btn" class="btn-primary w-full py-4 mt-6 text-lg">
+        <i class="ri-search-line mr-2"></i>Extract Domain URLs
+      </button>
+      
+      <textarea id="extracted-urls" class="w-full h-40 mt-6 p-4 border-2 border-google-blue rounded-xl" placeholder="Extracted Domain URLs will appear here..." readonly></textarea>
+      
+      <button id="copy-urls-btn" class="btn-primary w-full py-4 mt-4 text-lg">
+        <i class="ri-file-copy-line mr-2"></i>Copy Extracted URLs
+      </button>
+      
+      <p class="mt-6 text-sm text-center text-gray-600 dark:text-gray-400">
+        <i class="ri-information-line mr-1"></i>Ensure your file contains URLs in readable text format. PDFs and DOCX files are supported for direct extraction.
+      </p>
+    </div>
+  </div>
+
+  <!-- Email Extractor -->
+  <div class="bg-blue-50 dark:bg-gray-800 py-16">
+    <div class="container mx-auto px-6">
+      <div class="bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-xl max-w-2xl mx-auto border-2 border-google-green">
+        <div class="mb-8">
+          <h2 class="text-3xl font-bold text-google-green mb-4 flex items-center justify-center">
+            <i class="ri-mail-line mr-3"></i>Email Extractor & Separator
+          </h2>
+          <p class="text-gray-700 dark:text-gray-300 mb-6 text-center">
+            This tool helps you separate personal email addresses (like Gmail, Yahoo) from domain-specific emails (e.g., info@example.com).
+          </p>
+          <div class="grid md:grid-cols-3 gap-4 text-sm">
+            <div class="flex items-center justify-center p-3 bg-google-green bg-opacity-10 rounded-lg">
+              <i class="ri-upload-line mr-2 text-google-green"></i>
+              <span>1. Upload your email file</span>
+            </div>
+            <div class="flex items-center justify-center p-3 bg-google-green bg-opacity-10 rounded-lg">
+              <i class="ri-group-line mr-2 text-google-green"></i>
+              <span>2. Auto-separate emails</span>
+            </div>
+            <div class="flex items-center justify-center p-3 bg-google-green bg-opacity-10 rounded-lg">
+              <i class="ri-clipboard-line mr-2 text-google-green"></i>
+              <span>3. Copy organized chunks</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="mb-6">
+          <label class="block mb-3 text-lg font-semibold text-gray-800 dark:text-gray-200">Upload Your Email File</label>
+          <input type="file" id="fileInput" class="p-4 border-2 border-google-green rounded-xl w-full bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+          <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">Supported formats: .txt, .csv</p>
+        </div>
+
+        <div class="mb-6">
+          <label class="block mb-3 text-lg font-semibold text-gray-800 dark:text-gray-200">Personal email filter</label>
+          <div class="grid grid-cols-2 gap-3">
+            <button type="button" id="personalFilterAll" class="btn-primary py-3">All personal emails</button>
+            <button type="button" id="personalFilterGmail" class="btn-secondary py-3">Gmail only (@gmail.com)</button>
+          </div>
+        </div>
+
+        <div id="emailChunksContainer" class="mt-8">
+          <!-- Chunks will dynamically render here -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Email Duplicates Remover -->
+  <div class="container mx-auto px-6 py-16">
+    <div class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl max-w-2xl mx-auto border-2 border-google-red">
+      <h2 class="text-center text-3xl font-bold mb-6 text-google-red">
+        <i class="ri-refresh-line mr-3"></i>Email Duplicate Remover
+      </h2>
+      <p class="text-center mb-8 text-lg text-gray-600 dark:text-gray-300">
+        Upload a file containing email addresses and remove duplicates effortlessly.
+      </p>
+
+      <label class="block text-center mb-6">
+        <input type="file" id="dup-fileInput" accept=".txt, .csv" class="hidden" onchange="showDupFileNameAndCount()">
+        <span class="inline-block bg-google-red text-white py-4 px-8 rounded-xl cursor-pointer transition-all duration-300 hover:bg-red-600 hover:transform hover:scale-105 text-lg font-medium">
+          <i class="ri-upload-line mr-2"></i>Upload File
+        </span>
+      </label>
+
+      <div id="dup-fileName" class="text-center mb-2 text-gray-600 dark:text-gray-400 italic"></div>
+      <div id="dup-emailCount" class="text-center mb-8 text-lg text-gray-600 dark:text-gray-300 font-semibold"></div>
+
+      <button onclick="removeDupDuplicates()" class="w-full bg-google-red text-white py-4 rounded-xl transition-all duration-300 hover:bg-red-600 focus:outline-none focus:ring-4 focus:ring-red-200 text-lg font-medium">
+        <i class="ri-delete-bin-line mr-2"></i>Remove Duplicates
+      </button>
+
+      <div id="dup-loading" class="text-center mt-8 hidden">
+        <div class="spinner mx-auto mb-4"></div>
+        <p class="text-google-red font-medium">Processing your file...</p>
+      </div>
+
+      <div id="dup-duplicateCount" class="text-center mt-6 text-google-red font-semibold hidden"></div>
+
+      <div id="dup-downloadLink" class="text-center mt-8 hidden">
+        <a href="#" id="dup-downloadBtn" download="cleaned_emails.txt" class="bg-google-green text-white py-3 px-6 rounded-xl hover:bg-green-600 transition-all duration-300 inline-block">
+          <i class="ri-download-line mr-2"></i>Download Cleaned Email List
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Email Segmentation Tool -->
+  <div class="bg-green-50 dark:bg-gray-800 py-16">
+    <div class="container mx-auto px-6">
+      <div class="bg-white dark:bg-gray-900 shadow-xl rounded-2xl p-8 max-w-2xl mx-auto border-2 border-google-yellow">
+        <h2 class="text-3xl font-bold text-google-yellow mb-8 flex items-center justify-center">
+          <i class="ri-mail-open-line mr-3"></i>Email Segmentation Tool
+        </h2>
+        
+        <textarea id="emailInput" class="w-full p-6 mb-6 border-2 border-google-yellow rounded-xl focus:outline-none focus:ring-4 focus:ring-yellow-200"
+          rows="8" placeholder="Paste your email addresses here (one per line)" oninput="updateSerialNumbers()"></textarea>
+        
+        <div id="serialNumbers" class="mb-6 text-lg text-gray-700 dark:text-gray-300 font-semibold flex items-center justify-center bg-yellow-50 dark:bg-gray-700 p-4 rounded-xl">
+          <i class="ri-list-ordered mr-3 text-google-yellow"></i>Total Emails: 0
+        </div>
+        
+        <div class="mb-8">
+          <label for="segmentSize" class="block text-lg text-gray-700 dark:text-gray-300 font-semibold mb-3 flex items-center">
+            <i class="ri-sort-asc mr-3 text-google-yellow"></i>Number of Segments:
+          </label>
+          <input type="number" id="segmentSize" class="w-full p-4 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-4 focus:ring-yellow-200 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+            min="1" value="1">
+        </div>
+        
+        <button onclick="segmentEmails()" class="w-full bg-google-yellow text-gray-900 py-4 rounded-xl hover:bg-yellow-500 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-yellow-200 text-lg font-medium">
+          <i class="ri-scissors-line mr-3"></i>Segment Emails
+        </button>
+        
+        <div id="resultsContainer" class="mt-8"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Statistics Section -->
+<section class="bg-white dark:bg-gray-900 py-16">
+  <div class="container mx-auto px-6">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div class="text-center p-8 bg-blue-50 dark:bg-gray-800 rounded-2xl">
+        <div class="text-5xl text-google-blue mb-4">
+          <i class="ri-mail-line"></i>
+        </div>
+        <p class="text-lg font-semibold mb-2 text-gray-700 dark:text-gray-300">Emails Processed</p>
+        <p class="text-4xl font-bold text-google-blue" id="emails-processed">0</p>
+      </div>
+      <div class="text-center p-8 bg-green-50 dark:bg-gray-800 rounded-2xl">
+        <div class="text-5xl text-google-green mb-4">
+          <i class="ri-scissors-cut-line"></i>
+        </div>
+        <p class="text-lg font-semibold mb-2 text-gray-700 dark:text-gray-300">Emails Segmented</p>
+        <p class="text-4xl font-bold text-google-green" id="emails-segmented">0</p>
+      </div>
+      <div class="text-center p-8 bg-red-50 dark:bg-gray-800 rounded-2xl">
+        <div class="text-5xl text-google-red mb-4">
+          <i class="ri-delete-bin-line"></i>
+        </div>
+        <p class="text-lg font-semibold mb-2 text-gray-700 dark:text-gray-300">Duplicates Removed</p>
+        <p class="text-4xl font-bold text-google-red" id="duplicates-removed">0</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Testimonials Section -->
+<section id="testimonials" class="bg-gray-50 dark:bg-gray-800 py-16">
+  <div class="container mx-auto px-6">
+    <h3 class="text-center text-3xl font-bold text-gray-700 dark:text-gray-300 mb-4">Trusted by over 5,000 users</h3>
+    <div class="flex justify-center items-center mb-12">
+      <div class="flex text-google-yellow text-3xl mr-3">
+        <i class="ri-star-fill"></i>
+        <i class="ri-star-fill"></i>
+        <i class="ri-star-fill"></i>
+        <i class="ri-star-fill"></i>
+        <i class="ri-star-half-fill"></i>
+      </div>
+      <span class="text-gray-600 dark:text-gray-400 text-lg font-medium">Rated 4.8 stars</span>
+    </div>
+
+    <div id="testimonialCarousel" class="carousel relative overflow-hidden rounded-lg shadow-lg bg-purple-600 p-8">
+            <!-- Testimonial Item 1 -->
+            <div class="carousel-item active flex flex-col items-center text-center transition-opacity duration-500 ease-in-out opacity-100">
+                <div class="testimonial-content w-full md:w-3/4 lg:w-2/3">
+                    <div class="flex items-center justify-center mb-4">
+                        <img src="https://res.cloudinary.com/dib5bkbsy/image/upload/v1721301156/images_5_ngtz0v.jpg" alt="Profile" class="w-16 h-16 rounded-full border-4 border-white shadow-lg mr-4">
+                        <div class="text-left">
+                            <h4 class="text-xl font-semibold text-white">Osman</h4>
+                            <p class="text-sm text-purple-200">Digital Marketer</p>
+                            <div class="rating text-yellow-400">
+                                <span class="star">&#9733;</span><span class="star">&#9733;</span><span class="star">&#9733;</span><span class="star">&#9733;</span><span class="star">&#9734;</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-white text-lg leading-relaxed">Extractingo has significantly streamlined our email extraction process. It's a must-have tool for any marketer!</p>
+                </div>
+            </div>
+
+            <!-- Testimonial Item 2 -->
+            <div class="carousel-item flex flex-col items-center text-center transition-opacity duration-500 ease-in-out opacity-0">
+                <div class="testimonial-content w-full md:w-3/4 lg:w-2/3">
+                    <div class="flex items-center justify-center mb-4">
+                        <img src="https://res.cloudinary.com/dib5bkbsy/image/upload/v1721300995/images_3_prqpng.jpg" alt="Profile" class="w-16 h-16 rounded-full border-4 border-white shadow-lg mr-4">
+                        <div class="text-left">
+                            <h4 class="text-xl font-semibold text-white">Mayus</h4>
+                            <p class="text-sm text-purple-200">CEO, Marketing Firm</p>
+                            <div class="rating text-yellow-400">
+                                <span class="star">&#9733;</span><span class="star">&#9733;</span><span class="star">&#9733;</span><span class="star">&#9733;</span><span class="star">&#9733;</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-white text-lg leading-relaxed">Using Extractingo has made managing our email lists effortless. It's user-friendly and very efficient.</p>
+                </div>
+            </div>
+
+            <!-- Additional Testimonial Items... -->
+                        <!-- Testimonial Item 3 -->
+            <div class="carousel-item flex flex-col items-center text-center transition-opacity duration-500 ease-in-out opacity-0">
+                <div class="testimonial-content w-full md:w-3/4 lg:w-2/3">
+                    <div class="flex items-center justify-center mb-4">
+                        <img src="https://res.cloudinary.com/dib5bkbsy/image/upload/v1721300995/images_2_tigmik.jpg" alt="Profile" class="w-16 h-16 rounded-full border-4 border-white shadow-lg mr-4">
+                        <div class="text-left">
+                            <h4 class="text-xl font-semibold text-white">Adoltech</h4>
+                            <p class="text-sm text-purple-200">Freelancer</p>
+                            <div class="rating text-yellow-400">
+                                <span class="star">&#9733;</span><span class="star">&#9733;</span><span class="star">&#9733;</span><span class="star">&#9733;</span><span class="star">&#9733;</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-white text-lg leading-relaxed">The email extraction tool on this website is incredibly accurate and efficient. It's helped us build a highly targeted email list and improve our overall marketing strategy.</p>
+                </div>
+            </div>
+            <!-- Testimonial Item 2 -->
+            <div class="carousel-item flex flex-col items-center text-center transition-opacity duration-500 ease-in-out opacity-0">
+                <div class="testimonial-content w-full md:w-3/4 lg:w-2/3">
+                    <div class="flex items-center justify-center mb-4">
+                        <img src="https://res.cloudinary.com/dib5bkbsy/image/upload/v1721300995/images_wx9nhd.jpg" alt="Profile" class="w-16 h-16 rounded-full border-4 border-white shadow-lg mr-4">
+                        <div class="text-left">
+                            <h4 class="text-xl font-semibold text-white">Rasab Sales</h4>
+                            <p class="text-sm text-purple-200">Network Marketer</p>
+                            <div class="rating text-yellow-400">
+                                <span class="star">&#9733;</span><span class="star">&#9733;</span><span class="star">&#9733;</span><span class="star">&#9733;</span><span class="star">&#9733;</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-white text-lg leading-relaxed">I was impressed by the ease of use and functionality of this website's tools. They've helped us streamline our list management process and improve our customer engagement</p>
+                </div>
+            </div>
+            <!-- Testimonial Item 5 -->
+            <div class="carousel-item flex flex-col items-center text-center transition-opacity duration-500 ease-in-out opacity-0">
+                <div class="testimonial-content w-full md:w-3/4 lg:w-2/3">
+                    <div class="flex items-center justify-center mb-4">
+                        <img src="https://res.cloudinary.com/dib5bkbsy/image/upload/v1723422185/IMG-20240812-WA0004_q4gwhe.jpg" alt="Profile" class="w-16 h-16 rounded-full border-4 border-white shadow-lg mr-4">
+                        <div class="text-left">
+                            <h4 class="text-xl font-semibold text-white">Sumar</h4>
+                            <p class="text-sm text-purple-200">Crypto Trader</p>
+                            <div class="rating text-yellow-400">
+                                <span class="star">&#9733;</span><span class="star">&#9733;</span><span class="star">&#9733;</span><span class="star">&#9733;</span><span class="star">&#9733;</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-white text-lg leading-relaxed">This website's tools have helped us uncover new business opportunities by easily extracting and segmenting our URL lists. It's a must-have for any business looking to grow their online presence.</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- Contact Section -->
+<section id="contact" class="py-16 bg-white dark:bg-gray-900">
+  <div class="container mx-auto px-6">
+    <div class="max-w-2xl mx-auto bg-gray-50 dark:bg-gray-800 rounded-2xl p-10 shadow-xl border-2 border-google-blue">
+      <div class="text-center mb-10">
+        <h2 class="text-4xl font-bold text-google-blue mb-4">Contact Us</h2>
+        <p class="text-xl text-gray-600 dark:text-gray-300">
+          We would love to hear from you! Please fill out the form below.
+        </p>
+      </div>
+      
+      <form class="space-y-6" action="https://formspree.io/f/xrgwdren" method="POST">
+        <div>
+          <label for="name" class="sr-only">Name</label>
+          <input id="name" name="name" type="text" autocomplete="name" required
+            class="w-full px-6 py-4 border-2 border-gray-300 dark:border-gray-600 rounded-xl shadow-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-google-blue bg-white dark:bg-gray-700"
+            placeholder="Your Name">
+        </div>
+        
+        <div>
+          <label for="email" class="sr-only">Email</label>
+          <input id="email" name="email" type="email" autocomplete="email" required
+            class="w-full px-6 py-4 border-2 border-gray-300 dark:border-gray-600 rounded-xl shadow-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-google-blue bg-white dark:bg-gray-700"
+            placeholder="Your Email">
+        </div>
+        
+        <div>
+          <label for="message" class="sr-only">Message</label>
+          <textarea id="message" name="message" rows="6" required
+            class="w-full px-6 py-4 border-2 border-gray-300 dark:border-gray-600 rounded-xl shadow-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-google-blue bg-white dark:bg-gray-700"
+            placeholder="Your Message"></textarea>
+        </div>
+        
+        <div>
+          <button type="submit" class="w-full py-4 px-6 bg-google-blue text-white font-semibold rounded-xl shadow-lg hover:bg-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-200 transition-all duration-300 text-lg">
+            <i class="ri-send-plane-line mr-2"></i>Submit Message
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- Footer Section -->
+<footer class="bg-gray-100 dark:bg-gray-800 py-12 border-t-4 border-google-blue">
+  <div class="container mx-auto px-6 text-center">
+    <div class="mb-6">
+      <div class="text-3xl font-bold mb-4">
+        <span class="text-google-blue">Extrac</span><span class="text-google-green">Tingo</span>
+      </div>
+      <p class="text-gray-600 dark:text-gray-400 mb-4">Professional email and URL extraction tools</p>
+    </div>
+    
+    <div class="flex justify-center items-center gap-6 mb-6">
+      <a href="https://www.x.com/eluthmaaniy" class="text-gray-600 dark:text-gray-400 hover:text-google-blue transition-all duration-300 transform hover:scale-110">
+        <i class="ri-twitter-x-fill text-3xl"></i>
+      </a>
+    </div>
+    
+    <div class="border-t border-gray-300 dark:border-gray-600 pt-6">
+      <p class="text-gray-600 dark:text-gray-400">&copy; <span id="currentYear"></span> Extractingo. All rights reserved.</p>
+      <p class="mt-2 text-gray-600 dark:text-gray-400">Developed with ❤️ by <span class="font-semibold text-google-blue">El Uthmaaniy</span></p>
+    </div>
+  </div>
+</footer>
+
+<!-- Scripts -->
+<script>
+  // Set current year
+  document.getElementById("currentYear").textContent = new Date().getFullYear();
+  
+  // Theme Management with localStorage
+  class ThemeManager {
+    constructor() {
+      this.theme = localStorage.getItem('extractingo-theme') || 'light';
+      this.init();
+    }
+    
+    init() {
+      this.applyTheme();
+      this.setupToggle();
+      this.saveUserPreference('theme', this.theme);
+    }
+    
+    applyTheme() {
+      if (this.theme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    }
+    
+    toggle() {
+      this.theme = this.theme === 'light' ? 'dark' : 'light';
+      localStorage.setItem('extractingo-theme', this.theme);
+      this.applyTheme();
+      this.saveUserPreference('theme', this.theme);
+      this.showSaveIndicator();
+    }
+    
+    setupToggle() {
+      document.getElementById('darkModeToggle').addEventListener('click', () => {
+        this.toggle();
+      });
+    }
+    
+    saveUserPreference(key, value) {
+      const preferences = JSON.parse(localStorage.getItem('extractingo-preferences') || '{}');
+      preferences[key] = value;
+      preferences.lastUpdated = new Date().toISOString();
+      localStorage.setItem('extractingo-preferences', JSON.stringify(preferences));
+    }
+    
+    showSaveIndicator() {
+      const indicator = document.getElementById('saveIndicator');
+      indicator.classList.add('show');
+      setTimeout(() => {
+        indicator.classList.remove('show');
+      }, 2000);
+    }
+  }
+  
+  // Initialize theme manager
+  const themeManager = new ThemeManager();
+  
+  // Enhanced User Experience Features
+  class UserExperienceManager {
+    constructor() {
+      this.stats = JSON.parse(localStorage.getItem('extractingo-stats') || '{"emailsProcessed": 0, "emailsSegmented": 0, "duplicatesRemoved": 0}');
+      this.init();
+    }
+    
+    init() {
+      this.loadStats();
+      this.setupAutoSave();
+      this.enhanceFormInputs();
+    }
+    
+    loadStats() {
+      this.animateValue('emails-processed', 0, this.stats.emailsProcessed || 100000000, 8000);
+      this.animateValue('emails-segmented', 0, this.stats.emailsSegmented || 50000000, 10000);
+      this.animateValue('duplicates-removed', 0, this.stats.duplicatesRemoved || 20000000, 12000);
+    }
+    
+    updateStats(type, count) {
+      this.stats[type] += count;
+      localStorage.setItem('extractingo-stats', JSON.stringify(this.stats));
+      themeManager.showSaveIndicator();
+    }
+    
+    animateValue(id, start, end, duration) {
+      let range = end - start;
+      let current = start;
+      let increment = end > start ? 1 : -1;
+      let stepTime = Math.abs(Math.floor(duration / range));
+      let obj = document.getElementById(id);
+      let timer = setInterval(function() {
+        current += increment;
+        obj.textContent = current.toLocaleString();
+        if (current === end) {
+          clearInterval(timer);
+        }
+      }, stepTime);
+    }
+    
+    setupAutoSave() {
+      // Auto-save form data
+      const inputs = document.querySelectorAll('input[type="text"], input[type="email"], textarea');
+      inputs.forEach(input => {
+        input.addEventListener('input', () => {
+          if (input.value) {
+            localStorage.setItem(`extractingo-form-${input.id}`, input.value);
+          }
+        });
+        
+        // Restore saved data
+        const saved = localStorage.getItem(`extractingo-form-${input.id}`);
+        if (saved && input.type !== 'file') {
+          input.value = saved;
+        }
+      });
+    }
+    
+    enhanceFormInputs() {
+      // Add loading states and better feedback
+      const buttons = document.querySelectorAll('button');
+      buttons.forEach(button => {
+        button.addEventListener('click', function() {
+          if (this.type === 'submit' || this.onclick) {
+            this.style.transform = 'scale(0.98)';
+            setTimeout(() => {
+              this.style.transform = 'scale(1)';
+            }, 150);
+          }
+        });
+      });
+    }
+  }
+  
+  // Initialize UX manager
+  const uxManager = new UserExperienceManager();
+  
+  // Dynamic text cycling
+  function cycleTexts() {
+    const texts = ["Email", "URL", "List"];
+    const colors = ["bg-google-blue", "bg-google-green", "bg-google-red"];
+    let index = 0;
+    
+    setInterval(() => {
+      const element = document.getElementById('dynamic-text');
+      element.className = `${colors[index]} text-white px-4 py-2 rounded-lg transition-all duration-500`;
+      element.textContent = texts[index];
+      index = (index + 1) % texts.length;
+    }, 3000);
+  }
+  
+  // Start cycling when page loads
+  window.addEventListener('load', () => {
+    cycleTexts();
+  });
+  
+  // Enhanced URL extraction functionality
+  async function extractFromPDF(file) {
+    // PDF extraction logic (keeping original functionality)
+    const pdf = await pdfjsLib.getDocument(URL.createObjectURL(file)).promise;
+    let text = '';
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      text += content.items.map(item => item.str).join(' ') + ' ';
+    }
+    return text;
+  }
+  
+  async function extractFromDOCX(file) {
+    // DOCX extraction logic (keeping original functionality)
+    const reader = new FileReader();
+    return new Promise((resolve, reject) => {
+      reader.onload = function (event) {
+        const zip = new JSZip(event.target.result);
+        const doc = new docxtemplater().loadZip(zip);
+        const text = doc.getFullText();
+        resolve(text);
+      };
+      reader.readAsArrayBuffer(file);
+    });
+  }
+  
+  function extractDomainsFromText(text) {
+    const urlPattern = /https?:\/\/(www\.)?([a-zA-Z0-9.-]+)(\/[a-zA-Z0-9._-]*)?/g;
+    const domains = new Set();
+    let match;
+    while ((match = urlPattern.exec(text)) !== null) {
+      domains.add(match[2]);
+    }
+    return Array.from(domains).join('\n');
+  }
+  
+  async function extractDomainsFromFile() {
+    const fileInput = document.getElementById('url-file-input');
+    const extractedDomainsTextArea = document.getElementById('extracted-urls');
+    const file = fileInput.files[0];
+    
+    if (!file) {
+      alert('Please select a file first.');
+      return;
+    }
+    
+    let text = '';
+    
+    try {
+      if (file.type === 'application/pdf') {
+        text = await extractFromPDF(file);
+      } else if (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+        text = await extractFromDOCX(file);
+      } else {
+        const reader = new FileReader();
+        reader.onload = function (event) {
+          text = event.target.result;
+          const domains = extractDomainsFromText(text);
+          extractedDomainsTextArea.value = domains;
+          uxManager.updateStats('emailsProcessed', domains.split('\n').length);
+        };
+        reader.readAsText(file);
+        return;
+      }
+      
+      const domains = extractDomainsFromText(text);
+      extractedDomainsTextArea.value = domains;
+      uxManager.updateStats('emailsProcessed', domains.split('\n').length);
+    } catch (error) {
+      alert('Error processing file: ' + error.message);
+    }
+  }
+  
+  function copyResults(textAreaId) {
+    const textArea = document.getElementById(textAreaId);
+    navigator.clipboard.writeText(textArea.value).then(() => {
+      // Enhanced copy feedback
+      const button = event.target;
+      const originalText = button.innerHTML;
+      button.innerHTML = '<i class="ri-check-line mr-2"></i>Copied!';
+      button.style.background = '#34A853';
+      
+      setTimeout(() => {
+        button.innerHTML = originalText;
+        button.style.background = '#4285F4';
+      }, 2000);
+    }).catch(err => {
+      console.error('Failed to copy:', err);
+      // Fallback for older browsers
+      textArea.select();
+      document.execCommand('copy');
+      alert('Results copied to clipboard');
+    });
+  }
+  
+  // Event listeners
+  document.getElementById('extract-urls-btn').addEventListener('click', extractDomainsFromFile);
+  document.getElementById('copy-urls-btn').addEventListener('click', function() {
+    copyResults('extracted-urls');
+  });
+  
+  // Email extraction functionality (keeping all original functionality)
+  document.getElementById('fileInput').addEventListener('change', handleFileUpload);
+  document.getElementById('personalFilterAll').addEventListener('click', function() {
+    setPersonalFilter(false);
+  });
+  document.getElementById('personalFilterGmail').addEventListener('click', function() {
+    setPersonalFilter(true);
+  });
+  
+  const maxEmailsPerChunk = 5000;
+  let lastExtractedEmails = [];
+  let gmailOnlyPersonal = false;
+
+  function setPersonalFilter(gmailOnly) {
+    gmailOnlyPersonal = gmailOnly;
+    const allBtn = document.getElementById('personalFilterAll');
+    const gmailBtn = document.getElementById('personalFilterGmail');
+    if (gmailOnly) {
+      allBtn.classList.remove('btn-primary');
+      allBtn.classList.add('btn-secondary');
+      gmailBtn.classList.remove('btn-secondary');
+      gmailBtn.classList.add('btn-primary');
+    } else {
+      allBtn.classList.remove('btn-secondary');
+      allBtn.classList.add('btn-primary');
+      gmailBtn.classList.remove('btn-primary');
+      gmailBtn.classList.add('btn-secondary');
+    }
+    if (lastExtractedEmails.length > 0) {
+      displaySeparatedEmails(lastExtractedEmails);
+    }
+  }
+
+  function applyPersonalFilter(personalEmails) {
+    if (!gmailOnlyPersonal) return personalEmails;
+    return personalEmails.filter(email => {
+      const domain = email.split('@')[1] || '';
+      return domain.toLowerCase() === 'gmail.com';
+    });
+  }
+
+  function displaySeparatedEmails(emailList) {
+    const container = document.getElementById('emailChunksContainer');
+    container.innerHTML = '';
+    const { personalEmails, domainEmails } = separateEmails(emailList);
+    const filteredPersonal = applyPersonalFilter(personalEmails);
+    const personalTitle = gmailOnlyPersonal ? 'Personal Emails (Gmail only)' : 'Personal Emails';
+    renderChunks(chunkEmails(filteredPersonal, maxEmailsPerChunk), personalTitle);
+    renderChunks(chunkEmails(domainEmails, maxEmailsPerChunk), 'Domain Emails');
+  }
+  
+  function handleFileUpload(event) {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const fileContents = e.target.result;
+        const emailList = extractEmails(fileContents);
+        
+        if (emailList.length > 0) {
+          alert(`Total emails extracted: ${emailList.length}`);
+          uxManager.updateStats('emailsProcessed', emailList.length);
+          lastExtractedEmails = emailList;
+          displaySeparatedEmails(emailList);
+        } else {
+          alert("No valid email addresses found in the file.");
+        }
+      };
+      reader.readAsText(file);
+    } else {
+      alert("Please upload a file.");
+    }
+  }
+  
+  function extractEmails(text) {
+    const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
+    return text.match(emailRegex) || [];
+  }
+  
+  function separateEmails(emailList) {
+    const personalEmails = [];
+    const domainEmails = [];
+    const personalDomains = ['gmail.com', 'yahoo.com', 'outlook.com', 'hotmail.com', 'icloud.com'];
+    
+    emailList.forEach(email => {
+      const domain = email.split('@')[1];
+      if (personalDomains.includes(domain)) {
+        personalEmails.push(email);
+      } else {
+        domainEmails.push(email);
+      }
+    });
+    
+    return { personalEmails, domainEmails };
+  }
+  
+  function chunkEmails(emailList, chunkSize) {
+    let chunks = [];
+    for (let i = 0; i < emailList.length; i += chunkSize) {
+      let chunk = emailList.slice(i, i + chunkSize);
+      chunks.push(chunk);
+    }
+    return chunks;
+  }
+  
+  function renderChunks(chunks, title) {
+    const container = document.getElementById('emailChunksContainer');
+    if (chunks.length === 0) return;
+    
+    const emailTypeHeader = document.createElement('h3');
+    emailTypeHeader.classList.add('text-2xl', 'font-bold', 'mt-8', 'mb-6', 'text-google-green');
+    emailTypeHeader.innerText = title;
+    container.appendChild(emailTypeHeader);
+    
+    chunks.forEach((chunk, index) => {
+      const chunkDiv = document.createElement('div');
+      chunkDiv.classList.add('email-chunk');
+      
+      const heading = document.createElement('h4');
+      heading.classList.add('text-xl', 'font-bold', 'mb-4', 'text-google-blue');
+      heading.innerText = `Chunk ${index + 1} (${chunk.length} emails)`;
+      chunkDiv.appendChild(heading);
+      
+      const textArea = document.createElement('textarea');
+      textArea.value = chunk.join('\n');
+      textArea.readOnly = true;
+      chunkDiv.appendChild(textArea);
+      
+      const copyButton = document.createElement('button');
+      copyButton.classList.add('mt-4', 'btn-primary', 'w-full');
+      copyButton.innerHTML = '<i class="ri-file-copy-line mr-2"></i>Copy this chunk';
+      copyButton.onclick = () => copyToClipboard(textArea.value);
+      chunkDiv.appendChild(copyButton);
+      
+      container.appendChild(chunkDiv);
+    });
+  }
+  
+  function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+      const indicator = document.getElementById('saveIndicator');
+      indicator.innerHTML = '<i class="ri-check-line mr-1"></i>Copied to clipboard!';
+      indicator.classList.add('show');
+      setTimeout(() => {
+        indicator.classList.remove('show');
+        indicator.innerHTML = '<i class="ri-save-line mr-1"></i>Preferences saved';
+      }, 2000);
+    }).catch(err => {
+      console.error('Failed to copy:', err);
+      alert('Copied to clipboard!');
+    });
+  }
+  
+  // Duplicate removal functionality
+  function showDupFileNameAndCount() {
+    const fileInput = document.getElementById('dup-fileInput');
+    const fileNameElement = document.getElementById('dup-fileName');
+    const emailCountElement = document.getElementById('dup-emailCount');
+    const file = fileInput.files[0];
+    
+    if (file) {
+      fileNameElement.textContent = `📁 ${file.name}`;
+      const reader = new FileReader();
+      
+      reader.onload = function (event) {
+        const emails = event.target.result.split('\n').map(email => email.trim()).filter(email => email);
+        emailCountElement.textContent = `📧 Total Emails: ${emails.length}`;
+      };
+      
+      reader.readAsText(file);
+    } else {
+      fileNameElement.textContent = '';
+      emailCountElement.textContent = '';
+    }
+  }
+  
+  function removeDupDuplicates() {
+    const fileInput = document.getElementById('dup-fileInput');
+    const loadingElement = document.getElementById('dup-loading');
+    const downloadLinkElement = document.getElementById('dup-downloadLink');
+    const downloadBtn = document.getElementById('dup-downloadBtn');
+    const duplicateCountElement = document.getElementById('dup-duplicateCount');
+    
+    const file = fileInput.files[0];
+    if (!file) {
+      alert('Please select a file first.');
+      return;
+    }
+    
+    const reader = new FileReader();
+    
+    loadingElement.classList.remove('hidden');
+    downloadLinkElement.classList.add('hidden');
+    duplicateCountElement.classList.add('hidden');
+    
+    reader.onload = function (event) {
+      setTimeout(() => {
+        const emails = event.target.result.split('\n').map(email => email.trim()).filter(email => email);
+        const uniqueEmails = Array.from(new Set(emails));
+        const duplicateCount = emails.length - uniqueEmails.length;
+        
+        duplicateCountElement.textContent = `🗑️ Removed ${duplicateCount} duplicate(s)`;
+        duplicateCountElement.classList.remove('hidden');
+        
+        uxManager.updateStats('duplicatesRemoved', duplicateCount);
+        
+        const cleanedEmailsText = uniqueEmails.join('\n');
+        const blob = new Blob([cleanedEmailsText], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        downloadBtn.href = url;
+        
+        loadingElement.classList.add('hidden');
+        downloadLinkElement.classList.remove('hidden');
+      }, 2000);
+    };
+    
+    reader.readAsText(file);
+  }
+  
+  // Email segmentation functionality
+  function updateSerialNumbers() {
+    const emailInput = document.getElementById('emailInput').value;
+    const emailCount = emailInput.trim() ? emailInput.trim().split('\n').filter(line => line.trim()).length : 0;
+    const serialNumbersContainer = document.getElementById('serialNumbers');
+    serialNumbersContainer.innerHTML = `<i class="ri-list-ordered mr-3 text-google-yellow"></i>Total Emails: ${emailCount}`;
+  }
+  
+  function segmentEmails() {
+    const emailInput = document.getElementById('emailInput').value;
+    const segmentSize = parseInt(document.getElementById('segmentSize').value, 10);
+    const resultsContainer = document.getElementById('resultsContainer');
+    
+    resultsContainer.innerHTML = '';
+    
+    if (!emailInput.trim()) {
+      alert('Please enter email addresses');
+      return;
+    }
+    
+    const emails = emailInput.split('\n').map(email => email.trim()).filter(email => email !== '');
+    const totalEmails = emails.length;
+    const segments = Math.ceil(totalEmails / segmentSize);
+    
+    uxManager.updateStats('emailsSegmented', totalEmails);
+    
+    for (let i = 0; i < segments; i++) {
+      const start = i * segmentSize;
+      const end = (i + 1) * segmentSize;
+      const segment = emails.slice(start, end).join('\n');
+      
+      const segmentResult = document.createElement('div');
+      segmentResult.classList.add('bg-white', 'dark:bg-gray-800', 'shadow-xl', 'p-6', 'mb-6', 'rounded-xl', 'border-2', 'border-google-yellow');
+      
+      const segmentHeader = document.createElement('h4');
+      segmentHeader.classList.add('text-lg', 'font-bold', 'mb-3', 'text-google-yellow');
+      segmentHeader.textContent = `Segment ${i + 1} (${segment.split('\n').length} emails)`;
+      segmentResult.appendChild(segmentHeader);
+      
+      const textArea = document.createElement('textarea');
+      textArea.value = segment;
+      textArea.readOnly = true;
+      textArea.onclick = (event) => copyText(event);
+      textArea.classList.add('w-full', 'p-4', 'border-2', 'border-google-yellow', 'rounded-lg', 'cursor-pointer', 'hover:bg-yellow-50', 'dark:hover:bg-gray-700', 'transition-colors');
+      segmentResult.appendChild(textArea);
+      
+      const copyBtn = document.createElement('button');
+      copyBtn.classList.add('btn-primary', 'w-full', 'mt-3');
+      copyBtn.innerHTML = '<i class="ri-file-copy-line mr-2"></i>Copy Segment';
+      copyBtn.onclick = () => copyText({target: textArea});
+      segmentResult.appendChild(copyBtn);
+      
+      resultsContainer.appendChild(segmentResult);
+    }
+  }
+  
+  function copyText(event) {
+    const textArea = event.target;
+    navigator.clipboard.writeText(textArea.value).then(() => {
+      const indicator = document.getElementById('saveIndicator');
+      indicator.innerHTML = '<i class="ri-check-line mr-1"></i>Segment copied!';
+      indicator.classList.add('show');
+      setTimeout(() => {
+        indicator.classList.remove('show');
+        indicator.innerHTML = '<i class="ri-save-line mr-1"></i>Preferences saved';
+      }, 2000);
+    }).catch(err => {
+      textArea.select();
+      document.execCommand('copy');
+      alert('Segment copied to clipboard!');
+    });
+  }
+  
+   // Automatically slide testimonials
+function slideTestimonials() {
+  const testimonials = document.querySelectorAll('.carousel-item');
+  let currentSlide = 0;
+
+  function nextSlide() {
+    testimonials[currentSlide].classList.remove('active');
+    currentSlide = (currentSlide + 1) % testimonials.length;
+    testimonials[currentSlide].classList.add('active');
+  }
+
+  setInterval(nextSlide, 5000); // Adjust interval as per your requirement (in milliseconds)
+}
+
+slideTestimonials();
+   
+  
+  // Smooth scrolling for navigation links
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+      e.preventDefault();
+      const target = document.querySelector(this.getAttribute('href'));
+      if (target) {
+        target.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }
+    });
+  });
+  
+  // Performance optimization: Lazy load images
+  if ('IntersectionObserver' in window) {
+    const imageObserver = new IntersectionObserver((entries, observer) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const img = entry.target;
+          img.src = img.dataset.src;
+          img.classList.remove('lazy');
+          imageObserver.unobserve(img);
+        }
+      });
+    });
+    
+    document.querySelectorAll('img[data-src]').forEach(img => {
+      imageObserver.observe(img);
+    });
+  }
+</script>
+
+</body>
+</html>

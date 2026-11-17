@@ -1,0 +1,58 @@
+/* Scoutier Sans (UI) + IBM Plex Mono (extracted lists). */
+@import './scoutier-sans.generated.css';
+@import '@fontsource/ibm-plex-mono/400.css';
+@import '@fontsource/ibm-plex-mono/500.css';
+
+@layer base {
+  :root {
+    --font-sans: 'Scoutier Sans', 'Scoutier Sans Fallback', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --tracking-tiny: 0.012em;
+    --tracking-body: -0.011em;
+    --tracking-title: -0.022em;
+    --weight-regular: 400;
+    --weight-medium: 510;
+    --weight-semibold: 590;
+    --weight-bold: 700;
+  }
+
+  html, body, #root {
+    font-family: var(--font-sans);
+  }
+
+  body {
+    font-size: 15px;
+    font-weight: var(--weight-regular);
+    line-height: 1.35;
+    letter-spacing: var(--tracking-body);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: "kern", "liga", "calt";
+    font-variant-numeric: lining-nums;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-sans);
+    font-weight: var(--weight-semibold);
+    letter-spacing: var(--tracking-title);
+    line-height: 1.2;
+  }
+
+  h1 { font-size: 22px; font-weight: var(--weight-bold); letter-spacing: -0.026em; }
+  h2 { font-size: 17px; }
+  h3 { font-size: 15px; letter-spacing: -0.016em; }
+
+  button, input, textarea, select {
+    font-family: inherit;
+  }
+
+  button {
+    font-weight: var(--weight-medium);
+    letter-spacing: var(--tracking-body);
+  }
+
+  strong, b {
+    font-weight: var(--weight-semibold);
+  }
+}

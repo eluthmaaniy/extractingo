@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#F9FAFB" />
+    <title>Extractingo — Email & URL extractor</title>
+    <meta
+      name="description"
+      content="Free Scoutier tool to extract, separate, clean, and chunk email and URL lists in the browser. No sign-up."
+    />
+    <meta name="author" content="Scoutier" />
+    <link rel="canonical" href="https://extractingo.scoutier.com.ng/" />
+    <meta property="og:title" content="Extractingo — Email & URL extractor" />
+    <meta
+      property="og:description"
+      content="Extract, separate, clean, and chunk email and URL lists. A free Scoutier product."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://extractingo.scoutier.com.ng/" />
+    <meta property="og:site_name" content="Extractingo" />
+    <link rel="icon" type="image/png" href="https://res.cloudinary.com/dib5bkbsy/image/upload/v1789347595/scoutier-logo_bvt9ap.png" />
+    <link rel="preload" href="/fonts/scoutier-sans.v3.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.9.0/fonts/remixicon.css" rel="stylesheet" />
+    <style>
+      html { background-color: #F9FAFB; }
+      body { background-color: #F9FAFB; margin: 0; }
+      html.dark, html.dark body { background-color: #17191C; }
+    </style>
+    <script>
+      try {
+        if (localStorage.getItem('extractingo-theme') === 'dark') {
+          document.documentElement.classList.add('dark');
+          document.querySelector('meta[name="theme-color"]')?.setAttribute('content', '#17191C');
+        }
+      } catch (e) { /* ignore */ }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
