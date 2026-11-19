@@ -6,9 +6,21 @@ export const POLICY_SESSION_VERSION = 1;
 
 export type PolicyHitRecord = { store: string; policyUrl: string; email: string };
 
-export type PolicyMissRecord = { store: string; url: string; detail: string };
+export type PolicyMissRecord = {
+  store: string;
+  url: string;
+  detail: string;
+  status: "not-shopify" | "failed" | "blocked";
+};
 
-export type PolicyRunReport = { empty: number; missed: number; finished: boolean };
+export type PolicyRunReport = {
+  empty: number;
+  notShopify: number;
+  missed: number;
+  finished: boolean;
+  startedAt: number;
+  endedAt: number;
+};
 
 export type PolicySession = {
   version: typeof POLICY_SESSION_VERSION;
@@ -36,7 +48,14 @@ function sanitizeMiss(value: unknown): PolicyMissRecord | null {
   if (!value || typeof value !== "object") return null;
   const miss = value as PolicyMissRecord;
   if (typeof miss.store !== "string" || typeof miss.url !== "string") return null;
-  return { store: miss.store, url: miss.url, detail: typeof miss.detail === "string" ? miss.detail : "" };
+  const detail = typeof miss.detail === "string" ? miss.detail : "";
+  const status =
+    miss.status === "not-shopify" || miss.status === "blocked" || miss.status === "failed"
+      ? miss.status
+      : /shopify store record|not a shopify/i.test(detail)
+        ? "not-shopify"
+        : "failed";
+  return { store: miss.store, url: miss.url, detail, status };
 }
 
 export function isPolicySession(value: unknown): value is PolicySession {
@@ -61,8 +80,11 @@ export function normalizePolicySession(value: PolicySession): PolicySession {
     hits: value.hits.map(sanitizeHit).filter((hit): hit is PolicyHitRecord => hit !== null),
     summary: {
       empty: typeof raw.summary?.empty === "number" ? raw.summary.empty : 0,
-      missed: typeof raw.summary?.missed === "number" ? raw.summary.missed : misses.length,
+      notShopify: typeof raw.summary?.notShopify === "number" ? raw.summary.notShopify : misses.filter((miss) => miss.status === "not-shopify").length,
+      missed: typeof raw.summary?.missed === "number" ? raw.summary.missed : misses.filter((miss) => miss.status !== "not-shopify").length,
       finished: raw.summary?.finished === true,
+      startedAt: typeof raw.summary?.startedAt === "number" ? raw.summary.startedAt : 0,
+      endedAt: typeof raw.summary?.endedAt === "number" ? raw.summary.endedAt : 0,
     },
     misses,
   };

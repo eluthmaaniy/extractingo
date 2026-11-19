@@ -1,14 +1,14 @@
 import { readStorePolicy, type ShopPolicyRead } from "@/lib/shopifyPolicy";
 
-const CONCURRENCY = 12;
 const FLUSH_MS = 200;
 
 type Job = { host: string; url: string };
-type Start = { jobs: Job[] };
+type Start = { jobs: Job[]; concurrency?: number };
 export type PolicyBatchItem = { url: string; read: ShopPolicyRead };
 
 self.onmessage = (event: MessageEvent<Start>) => {
   const jobs = event.data.jobs ?? [];
+  const concurrency = Math.min(12, Math.max(1, event.data.concurrency ?? 8));
   const queue = jobs.slice();
   let batch: PolicyBatchItem[] = [];
   let timer: ReturnType<typeof setTimeout> | undefined;
@@ -42,7 +42,7 @@ self.onmessage = (event: MessageEvent<Start>) => {
     }
   };
 
-  void Promise.all(Array.from({ length: Math.min(CONCURRENCY, Math.max(jobs.length, 1)) }, () => worker())).then(() => {
+  void Promise.all(Array.from({ length: Math.min(concurrency, Math.max(jobs.length, 1)) }, () => worker())).then(() => {
     clearTimeout(timer);
     flush();
     self.postMessage({ type: "done" });

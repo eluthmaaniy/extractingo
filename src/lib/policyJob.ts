@@ -3,12 +3,19 @@ import { readStorePolicy } from "@/lib/shopifyPolicy";
 
 export type PolicyJob = { host: string; url: string };
 
-const WORKERS = 2;
+export type PolicyPace = { concurrency: number; workers: number };
 
-function chunks(jobs: PolicyJob[]): PolicyJob[][] {
+/** Phones get one lighter queue. A wide screen uses two queues. */
+export function policyPace(): PolicyPace {
+  const narrow = typeof matchMedia !== "undefined" && matchMedia("(max-width: 768px)").matches;
+  if (narrow) return { concurrency: 6, workers: 1 };
+  return { concurrency: 8, workers: 2 };
+}
+
+function chunks(jobs: PolicyJob[], groups: number): PolicyJob[][] {
   if (jobs.length === 0) return [];
-  const groups = jobs.length > 24 ? WORKERS : 1;
-  const size = Math.ceil(jobs.length / groups);
+  const count = jobs.length > 24 ? groups : 1;
+  const size = Math.ceil(jobs.length / count);
   const parts: PolicyJob[][] = [];
   for (let i = 0; i < jobs.length; i += size) parts.push(jobs.slice(i, i + size));
   return parts;
@@ -18,8 +25,9 @@ function chunks(jobs: PolicyJob[]): PolicyJob[][] {
 export function runPolicyJobs(
   jobs: PolicyJob[],
   onBatch: (items: PolicyBatchItem[]) => void,
+  pace: PolicyPace = policyPace(),
 ): { cancel: () => void; done: Promise<void> } {
-  const parts = chunks(jobs);
+  const parts = chunks(jobs, pace.workers);
   const workers: Worker[] = [];
   let settled = false;
 
@@ -59,7 +67,7 @@ export function runPolicyJobs(
       worker.onerror = () => {
         if (!settled) fail(new Error("worker"));
       };
-      worker.postMessage({ jobs: part });
+      worker.postMessage({ jobs: part, concurrency: pace.concurrency });
     }
   });
 
@@ -74,7 +82,11 @@ export function runPolicyJobs(
 }
 
 /** Same batching on the page thread if a worker cannot start. */
-export async function runPolicyJobsHere(jobs: PolicyJob[], onBatch: (items: PolicyBatchItem[]) => void): Promise<void> {
+export async function runPolicyJobsHere(
+  jobs: PolicyJob[],
+  onBatch: (items: PolicyBatchItem[]) => void,
+  pace: PolicyPace = policyPace(),
+): Promise<void> {
   const queue = jobs.slice();
   let batch: PolicyBatchItem[] = [];
   let timer = 0;
@@ -97,7 +109,7 @@ export async function runPolicyJobsHere(jobs: PolicyJob[], onBatch: (items: Poli
       schedule();
     }
   };
-  await Promise.all(Array.from({ length: Math.min(12, Math.max(jobs.length, 1)) }, () => worker()));
+  await Promise.all(Array.from({ length: Math.min(pace.concurrency, Math.max(jobs.length, 1)) }, () => worker()));
   window.clearTimeout(timer);
   flush();
 }

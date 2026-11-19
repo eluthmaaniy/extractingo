@@ -475,7 +475,7 @@ export function Workspace() {
 
       <div className="space-y-1.5">
         <Textarea
-          className="min-h-[140px] bg-card font-mono text-[13px] font-normal leading-5 dark:bg-card"
+          className="min-h-[140px] bg-card font-mono text-[12px] font-normal leading-5 dark:bg-card"
           placeholder={PLACEHOLDERS[mode]}
           value={text}
           readOnly={bulkActive}

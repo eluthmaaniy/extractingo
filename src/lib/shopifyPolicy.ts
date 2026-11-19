@@ -19,6 +19,14 @@ export type ShopPolicyRead = {
   detail: string;
 };
 
+/** A miss that often succeeds on another try: timeout, network, or a Shopify throttle. */
+export function isTemporaryMiss(read: ShopPolicyRead): boolean {
+  if (read.emails.length > 0) return false;
+  if (read.status === "blocked") return true;
+  if (read.status === "failed" && !/locked/i.test(read.detail)) return true;
+  return false;
+}
+
 type FetchLike = typeof fetch;
 
 type PolicyPayload = {

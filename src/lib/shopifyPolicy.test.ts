@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { readStorePolicy } from "@/lib/shopifyPolicy";
+import { isTemporaryMiss, readStorePolicy } from "@/lib/shopifyPolicy";
 
 function jsonResponse(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -7,6 +7,16 @@ function jsonResponse(body: unknown, status = 200): Response {
     headers: { "Content-Type": "application/json" },
   });
 }
+
+describe("isTemporaryMiss", () => {
+  it("retries timeouts and blocks, and keeps a locked store or a real answer", () => {
+    expect(isTemporaryMiss({ store: "a.com", policyUrl: "", emails: [], status: "failed", detail: "Shopify did not return the privacy policy." })).toBe(true);
+    expect(isTemporaryMiss({ store: "a.com", policyUrl: "", emails: [], status: "blocked", detail: "Shopify blocked this lookup. Wait and try again." })).toBe(true);
+    expect(isTemporaryMiss({ store: "a.com", policyUrl: "", emails: [], status: "failed", detail: "This store's online channel is locked." })).toBe(false);
+    expect(isTemporaryMiss({ store: "a.com", policyUrl: "", emails: [], status: "not-shopify", detail: "This site is not a Shopify store." })).toBe(false);
+    expect(isTemporaryMiss({ store: "a.com", policyUrl: "u", emails: ["a@a.com"], status: "ok", detail: "1 email" })).toBe(false);
+  });
+});
 
 describe("readStorePolicy", () => {
   it("reads emails from the Storefront privacy policy and drops the page text", async () => {
