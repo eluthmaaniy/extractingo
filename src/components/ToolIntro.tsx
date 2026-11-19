@@ -28,6 +28,12 @@ const COPY: Record<
     steps: ["Paste one email per line", "Set emails per segment", "Split, then copy each piece"],
     hint: "This does not extract emails. Paste a list that is already clean.",
   },
+  stores: {
+    title: "Store policy emails",
+    tagline: "Paste Shopify store URLs. Extractingo reads each privacy policy and lists the contact emails.",
+    steps: ["Drop or paste store URLs", "Find emails", "Copy or download the list"],
+    hint: "Shopify stores only. A long list stays on one progress line. The policy text is not kept.",
+  },
 };
 
 export function ToolIntro({ mode }: { mode: WorkspaceMode }) {

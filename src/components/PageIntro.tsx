@@ -6,7 +6,7 @@ export function PageIntro() {
       </h1>
       <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
         For outbound, lead lists, virtual assistants, and anyone cleaning large email or URL files. Paste or drop a
-        document — it is never uploaded.
+        document, or open Stores for a public privacy-policy page. Nothing is uploaded.
       </p>
     </header>
   );

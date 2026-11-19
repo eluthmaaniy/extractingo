@@ -9,12 +9,15 @@ describe("modeFromHash", () => {
     expect(modeFromHash("#duplicates")).toBe("clean");
     expect(modeFromHash("#split")).toBe("segment");
     expect(modeFromHash("#segmentation")).toBe("segment");
+    expect(modeFromHash("#stores")).toBe("stores");
+    expect(modeFromHash("#policy")).toBe("stores");
     expect(modeFromHash("")).toBe("emails");
   });
 
   it("round-trips hashes", () => {
     expect(hashForMode("emails")).toBe("emails");
     expect(hashForMode("segment")).toBe("split");
+    expect(hashForMode("stores")).toBe("stores");
   });
 
   it("has FAQ copy for crawlers", () => {

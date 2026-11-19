@@ -56,6 +56,12 @@ export const TOOL_SEO: Record<WorkspaceMode, { title: string; description: strin
       "Cut a finished email list into equal pieces by emails per segment. Copy or download each batch for outreach, CRM import, or sending tools.",
     hash: "split",
   },
+  stores: {
+    title: "Store Privacy Policy Email Finder | Extractingo",
+    description:
+      "Paste Shopify store URLs. Extractingo reads each public privacy policy in your browser and lists the contact emails. Nothing is uploaded.",
+    hash: "stores",
+  },
 };
 
 export const FAQS: { q: string; a: string }[] = [
@@ -99,6 +105,10 @@ export const FAQS: { q: string; a: string }[] = [
     q: "What files can I drop?",
     a: ".txt, .csv, .pdf, and .docx. Large files are read in the background so the page stays usable.",
   },
+  {
+    q: "How do I pull the contact email from a store privacy policy?",
+    a: "Open Stores and paste Shopify store URLs, one per line. Find emails reads each store's public privacy policy in your browser and lists the addresses. You do not open the policy pages. Stores that are not on Shopify, or policies with no email address, are marked on that row. Nothing is uploaded.",
+  },
 ];
 
 export function applyDocumentSeo(mode: WorkspaceMode) {
@@ -121,6 +131,7 @@ export function modeFromHash(hash = window.location.hash): WorkspaceMode {
   if (id === "urls" || id === "url") return "urls";
   if (id === "clean" || id === "duplicates" || id === "dedupe") return "clean";
   if (id === "split" || id === "segment" || id === "segmentation") return "segment";
+  if (id === "stores" || id === "store" || id === "policy" || id === "policies") return "stores";
   return "emails";
 }
 
@@ -169,6 +180,7 @@ export function buildJsonLd() {
           "Extract clean http(s) URLs with no surrounding words",
           "Remove duplicate emails from a list",
           "Split large email lists into segments",
+          "Read contact emails from a public store privacy policy",
           "Copy or download results as TXT or CSV",
           "Runs entirely in the browser — lists are not uploaded",
         ],

@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import { ModeSwitcher, type WorkspaceMode } from "@/components/ModeSwitcher";
 import { ReplaceConfirm } from "@/components/SessionBanner";
 import { ResultPane } from "@/components/ResultPane";
+import { StoresTool } from "@/components/StoresTool";
 import { ToolIntro } from "@/components/ToolIntro";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,6 +44,7 @@ const PLACEHOLDERS: Record<WorkspaceMode, string> = {
   urls: "Paste text that contains http(s) links…",
   clean: "Paste one email or URL per line…",
   segment: "Paste a cleaned list, one email per line…",
+  stores: "Paste one store URL per line…",
 };
 
 const DROP_COPY: Record<WorkspaceMode, { title: string; subtitle: string }> = {
@@ -62,6 +64,10 @@ const DROP_COPY: Record<WorkspaceMode, { title: string; subtitle: string }> = {
     title: "Drop a cleaned list",
     subtitle: "This splits lines. It does not extract emails from paragraphs.",
   },
+  stores: {
+    title: "Drop a list of store URLs",
+    subtitle: "One shop per line in .txt or .csv.",
+  },
 };
 
 const ACTIONS: Record<WorkspaceMode, { idle: string; busy: string; icon: string }> = {
@@ -69,6 +75,7 @@ const ACTIONS: Record<WorkspaceMode, { idle: string; busy: string; icon: string 
   urls: { idle: "Extract URLs", busy: "Extracting…", icon: "ri-links-line" },
   clean: { idle: "Remove duplicates", busy: "Cleaning…", icon: "ri-delete-bin-line" },
   segment: { idle: "Split list", busy: "Splitting…", icon: "ri-scissors-line" },
+  stores: { idle: "Find emails", busy: "Finding emails…", icon: "ri-store-2-line" },
 };
 
 export function Workspace() {
@@ -96,6 +103,7 @@ export function Workspace() {
   const [hydrated, setHydrated] = useState(false);
   const [pendingFiles, setPendingFiles] = useState<File[] | null>(null);
   const runRef = useRef<() => Promise<void>>(async () => undefined);
+  const storesRunRef = useRef<() => void>(() => undefined);
   const skipSave = useRef(true);
   const quotaWarned = useRef(false);
   const sessionRef = useRef<WorkspaceSession | null>(null);
@@ -206,6 +214,10 @@ export function Workspace() {
   };
 
   const run = async () => {
+    if (mode === "stores") {
+      storesRunRef.current();
+      return;
+    }
     const source = sourceText();
     if (!source.trim()) {
       toast.error("Paste text or drop a file first");
@@ -277,7 +289,7 @@ export function Workspace() {
         setUnique(session.unique);
         setPersonalFilter(session.personalFilter);
         setChunkSize(session.chunkSize);
-        setExtracted(session.extracted ?? emptyExtracted());
+        setExtracted({ ...emptyExtracted(), ...(session.extracted ?? {}) });
         setPersonal(session.personal);
         setDomain(session.domain);
         setUrls(session.urls);
@@ -396,6 +408,16 @@ export function Workspace() {
     );
   }
 
+  if (mode === "stores") {
+    return (
+      <section id="tool" className="gmail-card-static space-y-4 p-3.5 sm:space-y-5 sm:p-6">
+        <ModeSwitcher value={mode} onChange={setMode} />
+        <ToolIntro mode={mode} />
+        <StoresTool runRef={storesRunRef} />
+      </section>
+    );
+  }
+
   return (
     <section id="tool" className="gmail-card-static space-y-4 p-3.5 sm:space-y-5 sm:p-6">
       <ModeSwitcher value={mode} onChange={setMode} />
@@ -453,7 +475,7 @@ export function Workspace() {
 
       <div className="space-y-1.5">
         <Textarea
-          className="min-h-[140px] bg-card font-mono text-[16px] dark:bg-card sm:text-xs"
+          className="min-h-[140px] bg-card font-mono text-[13px] font-normal leading-5 dark:bg-card"
           placeholder={PLACEHOLDERS[mode]}
           value={text}
           readOnly={bulkActive}

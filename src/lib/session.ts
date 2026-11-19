@@ -36,6 +36,7 @@ export const EMPTY_EXTRACTED: ExtractedFlags = {
   urls: false,
   clean: false,
   segment: false,
+  stores: false,
 };
 
 export function emptyExtracted(): ExtractedFlags {
