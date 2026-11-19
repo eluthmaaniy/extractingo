@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { ModeSwitcher, type WorkspaceMode } from "@/components/ModeSwitcher";
-import { ReplaceConfirm, SessionBanner } from "@/components/SessionBanner";
+import { ReplaceConfirm } from "@/components/SessionBanner";
 import { ResultPane } from "@/components/ResultPane";
 import { ToolIntro } from "@/components/ToolIntro";
 import { Button } from "@/components/ui/button";
@@ -38,13 +38,6 @@ function previewSource(source: string): string {
   );
 }
 
-function formatSourceSize(source: string): string {
-  const kb = source.length / 1024;
-  if (kb < 1) return `${source.length} characters`;
-  if (kb < 1024) return `${kb < 10 ? kb.toFixed(1) : Math.round(kb)} KB`;
-  return `${(kb / 1024).toFixed(1)} MB`;
-}
-
 const PLACEHOLDERS: Record<WorkspaceMode, string> = {
   emails: "Paste mixed text, a crawl, or an email list…",
   urls: "Paste text that contains http(s) links…",
@@ -55,11 +48,11 @@ const PLACEHOLDERS: Record<WorkspaceMode, string> = {
 const DROP_COPY: Record<WorkspaceMode, { title: string; subtitle: string }> = {
   emails: {
     title: "Drop files or click to browse",
-    subtitle: ".txt, .csv, .pdf, .docx — the file is not pasted into the box. Extract below.",
+    subtitle: ".txt, .csv, .pdf, .docx — addresses are found in the file",
   },
   urls: {
     title: "Drop a file that contains links",
-    subtitle: ".txt, .csv, .pdf, .docx — the file is not pasted into the box. Extract below.",
+    subtitle: ".txt, .csv, .pdf, .docx — only the URL itself is kept",
   },
   clean: {
     title: "Drop a finished list",
@@ -101,7 +94,6 @@ export function Workspace() {
   const [segments, setSegments] = useState<string[][]>([]);
   const [bucket, setBucket] = useState<EmailBucket>("personal");
   const [hydrated, setHydrated] = useState(false);
-  const [savedAt, setSavedAt] = useState<number | null>(null);
   const [pendingFiles, setPendingFiles] = useState<File[] | null>(null);
   const runRef = useRef<() => Promise<void>>(async () => undefined);
   const skipSave = useRef(true);
@@ -162,8 +154,6 @@ export function Workspace() {
       await clearSession();
       return;
     }
-    if (result === "ok") setSavedAt(session.updatedAt);
-    if (result === "empty") setSavedAt(null);
     if (result === "quota" && !quotaWarned.current) {
       quotaWarned.current = true;
       toast.error("This list is too large to keep after refresh. Download it if you need a copy.");
@@ -178,42 +168,24 @@ export function Workspace() {
     setFileNames([]);
     resetResults();
     setPendingFiles(null);
-    setSavedAt(null);
     void clearSession().finally(() => {
       skipSave.current = false;
     });
-    toast.success("Removed the list from this browser");
   };
 
   const attachFileSource = (value: string, names: string[]) => {
     bulkRef.current = value;
-    setBulkActive(true);
-    setText("");
     setFileNames(names);
   };
 
-  const pasteInstead = () => {
-    bulkRef.current = null;
-    setBulkActive(false);
-    setText("");
-    setFileNames([]);
-    resetResults();
-  };
-
-  const loadFiles = async (files: File[], replaced: boolean) => {
+  const loadFiles = async (files: File[]) => {
     if (files.length === 0) return;
-    toast.info(`Reading ${files.length === 1 ? files[0].name : `${files.length} files`}…`);
     setProcessing(true);
     setProgress(0);
     try {
       const { text: next, names } = await readSourceFiles(files, setProgress);
       attachFileSource(next, names);
       resetResults();
-      if (replaced) {
-        toast.success(`Replaced the previous list with ${names.join(", ")}. Not merged.`);
-      } else {
-        toast.success(`Loaded ${names.join(", ")}. Use ${ACTIONS[mode].idle} below.`);
-      }
     } catch (err) {
       console.error(err);
       toast.error("Could not read that file. Try .txt, .csv, .pdf, or .docx.");
@@ -230,7 +202,7 @@ export function Workspace() {
       setPendingFiles(files);
       return;
     }
-    void loadFiles(files, false);
+    void loadFiles(files);
   };
 
   const run = async () => {
@@ -294,7 +266,7 @@ export function Workspace() {
       if (session && !isSessionEmpty(session)) {
         if (session.fileNames.length > 0) {
           bulkRef.current = session.source;
-          setBulkActive(true);
+          setBulkActive(false);
           setText("");
         } else {
           bulkRef.current = session.source.length > LARGE_INPUT_THRESHOLD ? session.source : null;
@@ -313,9 +285,7 @@ export function Workspace() {
         setDupStats(session.dupStats);
         setSegments(session.segments);
         setBucket(session.bucket);
-        setSavedAt(session.updatedAt);
         if (!window.location.hash) setMode(session.mode);
-        toast.success("Restored your last list from this browser");
       }
       skipSave.current = false;
       setHydrated(true);
@@ -422,9 +392,7 @@ export function Workspace() {
 
   if (!hydrated) {
     return (
-      <section id="tool" className="gmail-card-static p-6 text-sm text-muted-foreground">
-        Restoring your last list…
-      </section>
+      <section id="tool" className="gmail-card-static min-h-[12rem] p-6" aria-busy="true" />
     );
   }
 
@@ -433,17 +401,13 @@ export function Workspace() {
       <ModeSwitcher value={mode} onChange={setMode} />
       <ToolIntro mode={mode} />
 
-      {savedAt && hasSource && (
-        <SessionBanner updatedAt={savedAt} fileNames={fileNames} onRemove={clear} />
-      )}
-
       {pendingFiles && (
         <ReplaceConfirm
           names={pendingFiles.map((file) => file.name)}
           onReplace={() => {
             const files = pendingFiles;
             setPendingFiles(null);
-            void loadFiles(files, true);
+            void loadFiles(files);
           }}
           onKeep={() => setPendingFiles(null)}
         />
@@ -482,50 +446,30 @@ export function Workspace() {
             }}
           />
         </label>
+        {fileNames.length > 0 && (
+          <p className="mt-3 text-center text-xs text-muted-foreground">{fileNames.join(", ")}</p>
+        )}
       </div>
 
-      {fileNames.length > 0 ? (
-        <div className="space-y-2 rounded-xl border border-border/70 bg-muted/20 px-4 py-3">
-          <p className="text-sm font-medium text-foreground">
-            {fileNames.join(", ")}
-            <span className="ml-2 font-normal text-muted-foreground">
-              {formatSourceSize(sourceText())} in this browser
-            </span>
+      <div className="space-y-1.5">
+        <Textarea
+          className="min-h-[140px] bg-card font-mono text-[16px] dark:bg-card sm:text-xs"
+          placeholder={PLACEHOLDERS[mode]}
+          value={text}
+          readOnly={bulkActive}
+          onChange={(e) => {
+            setFileNames([]);
+            setSource(e.target.value);
+            resetResults();
+          }}
+          aria-label="Paste text"
+        />
+        {bulkActive && (
+          <p className="text-xs text-muted-foreground">
+            Full paste is kept for extraction. The box is a preview so a second paste cannot mix into it.
           </p>
-          <p className="text-xs leading-relaxed text-muted-foreground">
-            The paste box is for typing only, so this file is not shown there. Use{" "}
-            <span className="font-medium text-foreground">{action.idle}</span> below — that is the result list.
-          </p>
-          <button
-            type="button"
-            className="text-xs font-medium text-primary hover:underline"
-            onClick={pasteInstead}
-          >
-            Paste text instead
-          </button>
-        </div>
-      ) : (
-        <div className="space-y-1.5">
-          <Textarea
-            className="min-h-[140px] bg-card font-mono text-[16px] dark:bg-card sm:text-xs"
-            placeholder={PLACEHOLDERS[mode]}
-            value={text}
-            readOnly={bulkActive}
-            onChange={(e) => {
-              setFileNames([]);
-              setSource(e.target.value);
-              resetResults();
-            }}
-            aria-label="Paste text"
-          />
-          {bulkActive && (
-            <p className="text-xs text-muted-foreground">
-              Full paste is kept for extraction. The box is a preview (not editable) so a second paste cannot mix into
-              it. Use Replace or Clear instead.
-            </p>
-          )}
-        </div>
-      )}
+        )}
+      </div>
 
       {mode === "emails" && (
         <div className="space-y-3">
@@ -624,7 +568,7 @@ export function Workspace() {
           <kbd className="rounded border border-border bg-muted/70 px-1 py-0.5">Enter</kbd>
           {" to run. "}
         </span>
-        Saved in this browser until you clear it. New files replace, they do not merge.
+        New files replace, they do not merge.
       </p>
 
       {processing && (

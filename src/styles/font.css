@@ -1,22 +1,22 @@
-/* IBM Plex Sans (UI) + IBM Plex Mono (extracted lists). Self-hosted, not Scoutier Sans. */
-@import '@fontsource/ibm-plex-sans/latin-400.css';
-@import '@fontsource/ibm-plex-sans/latin-500.css';
-@import '@fontsource/ibm-plex-sans/latin-600.css';
-@import '@fontsource/ibm-plex-sans/latin-700.css';
-@import '@fontsource/ibm-plex-mono/400.css';
-@import '@fontsource/ibm-plex-mono/500.css';
+/* Geist Sans (UI) + Geist Mono (extracted lists). Self-hosted. */
+@import '@fontsource/geist-sans/latin-400.css';
+@import '@fontsource/geist-sans/latin-500.css';
+@import '@fontsource/geist-sans/latin-600.css';
+@import '@fontsource/geist-sans/latin-700.css';
+@import '@fontsource/geist-mono/latin-400.css';
+@import '@fontsource/geist-mono/latin-500.css';
 
 @layer base {
   :root {
-    --font-sans: 'IBM Plex Sans', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-    --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    --tracking-tiny: 0.01em;
-    --tracking-body: -0.006em;
-    --tracking-title: -0.02em;
+    --font-sans: 'Geist Sans', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --tracking-tiny: 0.03em;
+    --tracking-body: -0.003em;
+    --tracking-title: -0.016em;
     --weight-regular: 400;
     --weight-medium: 500;
     --weight-semibold: 600;
-    --weight-bold: 700;
+    --weight-bold: 600;
   }
 
   html, body, #root {
@@ -26,12 +26,13 @@
   body {
     font-size: 14px;
     font-weight: var(--weight-regular);
-    line-height: 1.45;
+    line-height: 1.55;
     letter-spacing: var(--tracking-body);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
-    font-feature-settings: "kern", "liga", "calt";
+    font-kerning: normal;
+    font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
     font-variant-numeric: lining-nums;
   }
 
@@ -39,12 +40,13 @@
     font-family: var(--font-sans);
     font-weight: var(--weight-semibold);
     letter-spacing: var(--tracking-title);
-    line-height: 1.25;
+    line-height: 1.28;
+    text-wrap: pretty;
   }
 
-  h1 { font-size: 18px; font-weight: var(--weight-bold); letter-spacing: -0.024em; }
-  h2 { font-size: 15px; }
-  h3 { font-size: 14px; letter-spacing: -0.014em; }
+  h1 { font-size: 18px; font-weight: var(--weight-semibold); letter-spacing: -0.018em; line-height: 1.28; }
+  h2 { font-size: 15px; line-height: 1.35; }
+  h3 { font-size: 14px; letter-spacing: -0.01em; line-height: 1.35; }
 
   button, input, textarea, select {
     font-family: inherit;

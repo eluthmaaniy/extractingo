@@ -35,7 +35,7 @@ export function ToolIntro({ mode }: { mode: WorkspaceMode }) {
   return (
     <div className="space-y-3">
       <div className="space-y-1">
-        <h2 className="text-base font-bold tracking-tight text-foreground">{copy.title}</h2>
+        <h2 className="text-base font-bold tracking-[-0.016em] text-foreground">{copy.title}</h2>
         <p className="text-sm leading-relaxed text-muted-foreground">{copy.tagline}</p>
       </div>
       <ol className="flex max-w-full flex-wrap gap-2">
