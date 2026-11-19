@@ -5,11 +5,9 @@ export type PolicyJob = { host: string; url: string };
 
 export type PolicyPace = { concurrency: number; workers: number };
 
-/** Phones get one lighter queue. A wide screen uses two queues. */
+/** Two queues, each reading 12 stores at once. */
 export function policyPace(): PolicyPace {
-  const narrow = typeof matchMedia !== "undefined" && matchMedia("(max-width: 768px)").matches;
-  if (narrow) return { concurrency: 6, workers: 1 };
-  return { concurrency: 8, workers: 2 };
+  return { concurrency: 12, workers: 2 };
 }
 
 function chunks(jobs: PolicyJob[], groups: number): PolicyJob[][] {
@@ -56,12 +54,10 @@ export function runPolicyJobs(
         if (settled) return;
         if (event.data?.type === "batch") onBatch(event.data.items as PolicyBatchItem[]);
         if (event.data?.type === "done") {
+          const tail = event.data.items as PolicyBatchItem[] | undefined;
+          if (tail?.length) onBatch(tail);
           pending -= 1;
-          if (pending === 0) {
-            settled = true;
-            resolve();
-          }
-          worker.terminate();
+          if (pending === 0) resolve();
         }
       };
       worker.onerror = () => {

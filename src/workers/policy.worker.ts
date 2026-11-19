@@ -1,7 +1,5 @@
 import { readStorePolicy, type ShopPolicyRead } from "@/lib/shopifyPolicy";
 
-const FLUSH_MS = 200;
-
 type Job = { host: string; url: string };
 type Start = { jobs: Job[]; concurrency?: number };
 export type PolicyBatchItem = { url: string; read: ShopPolicyRead };
@@ -10,41 +8,28 @@ self.onmessage = (event: MessageEvent<Start>) => {
   const jobs = event.data.jobs ?? [];
   const concurrency = Math.min(12, Math.max(1, event.data.concurrency ?? 8));
   const queue = jobs.slice();
-  let batch: PolicyBatchItem[] = [];
-  let timer: ReturnType<typeof setTimeout> | undefined;
+  const results: PolicyBatchItem[] = [];
 
-  const flush = () => {
-    timer = undefined;
-    if (batch.length === 0) return;
-    const items = batch;
-    batch = [];
-    self.postMessage({ type: "batch", items });
-  };
-
-  const schedule = () => {
-    if (timer) return;
-    timer = setTimeout(flush, FLUSH_MS);
-  };
-
+  const slots = Math.min(concurrency, Math.max(jobs.length, 1));
   const worker = async () => {
     while (queue.length > 0) {
       const job = queue.shift();
-      if (!job) return;
+      if (!job) break;
+      let item: PolicyBatchItem;
       try {
-        batch.push({ url: job.url, read: await readStorePolicy(job.url) });
+        item = { url: job.url, read: await readStorePolicy(job.url) };
       } catch {
-        batch.push({
+        item = {
           url: job.url,
           read: { store: job.host, policyUrl: "", emails: [], status: "failed", detail: "Could not read this store." },
-        });
+        };
       }
-      schedule();
+      results.push(item);
+      self.postMessage({ type: "batch", items: [item] });
     }
   };
 
-  void Promise.all(Array.from({ length: Math.min(concurrency, Math.max(jobs.length, 1)) }, () => worker())).then(() => {
-    clearTimeout(timer);
-    flush();
-    self.postMessage({ type: "done" });
+  void Promise.all(Array.from({ length: slots }, () => worker())).then(() => {
+    self.postMessage({ type: "done", items: results });
   });
 };

@@ -209,6 +209,7 @@ export function StoresTool({ runRef }: { runRef: MutableRefObject<() => void> })
     const take = (item: PolicyBatchItem) => {
       if (runId.current !== id) return;
       const host = item.read.store || jobs.find((job) => job.url === item.url)?.host || "";
+      if (host && !pending.has(host)) return;
       if (host) pending.delete(host);
       if (isTemporaryMiss(item.read)) {
         again.push({ host, url: item.url });
@@ -220,29 +221,49 @@ export function StoresTool({ runRef }: { runRef: MutableRefObject<() => void> })
       for (const [host, url] of pending) again.push({ host, url });
       pending.clear();
     };
-    const run = runPolicyJobs(jobs, (items) => {
-      for (const item of items) take(item);
-    });
-    cancelRef.current = run.cancel;
-    return run.done
-      .then(() => {
+    return new Promise((resolve) => {
+      let closed = false;
+      const succeed = () => {
+        if (closed || pending.size > 0) return;
+        closed = true;
         finishLeft();
-        return again;
-      })
-      .catch(() => {
-        if (runId.current !== id) return again;
+        run.cancel();
+        resolve(again);
+      };
+      const run = runPolicyJobs(jobs, (items) => {
+        for (const item of items) take(item);
+        succeed();
+      });
+      cancelRef.current = () => {
+        closed = true;
+        run.cancel();
+      };
+      void run.done.then(() => {
+        succeed();
+      }).catch(() => {
+        if (closed) return;
+        if (runId.current !== id) {
+          closed = true;
+          resolve(again);
+          return;
+        }
         const left = jobs.filter((job) => pending.has(job.host));
         if (left.length === 0) {
+          closed = true;
           finishLeft();
-          return again;
+          resolve(again);
+          return;
         }
-        return runPolicyJobsHere(left, (items) => {
+        void runPolicyJobsHere(left, (items) => {
           for (const item of items) take(item);
         }).then(() => {
+          if (closed) return;
+          closed = true;
           finishLeft();
-          return again;
+          resolve(again);
         });
       });
+    });
   };
 
   const start = (jobs: PolicyJob[], retry: boolean) => {
