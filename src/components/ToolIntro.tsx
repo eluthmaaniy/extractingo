@@ -25,7 +25,7 @@ const COPY: Record<
   segment: {
     title: "List splitter",
     tagline: "Cuts a finished list into equal pieces so you can copy or send in batches.",
-    steps: ["Paste one email per line", "Set emails per segment", "Split, then copy each piece"],
+    steps: ["Paste one email per line", "Set emails per segment", "Split, then download all or each piece"],
     hint: "This does not extract emails. Paste a list that is already clean.",
   },
   stores: {

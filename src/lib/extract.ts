@@ -24,6 +24,7 @@ export const PERSONAL_DOMAINS = new Set([
 export type PersonalFilter = "all" | "gmail" | "yahoo" | "outlook";
 
 export const DEFAULT_CHUNK_SIZE = 5000;
+export const MAX_CHUNK_SIZE = 1_000_000;
 export const MAX_DISPLAY = 400;
 export const LARGE_INPUT_THRESHOLD = 120_000;
 export const TEXTAREA_PREVIEW_CAP = 80_000;
@@ -181,8 +182,14 @@ export function filterPersonal(emails: string[], filter: PersonalFilter): string
   return emails.filter((email) => matchesPersonalFilter(email, filter));
 }
 
+export function parseChunkSize(raw: string | number | null | undefined): number {
+  const n = typeof raw === "number" ? raw : Number(String(raw ?? "").trim());
+  if (!Number.isFinite(n) || n < 1) return DEFAULT_CHUNK_SIZE;
+  return Math.min(Math.floor(n), MAX_CHUNK_SIZE);
+}
+
 export function chunkList<T>(items: T[], chunkSize: number): T[][] {
-  const size = Math.max(1, Math.floor(chunkSize) || DEFAULT_CHUNK_SIZE);
+  const size = parseChunkSize(chunkSize);
   const chunks: T[][] = [];
   for (let i = 0; i < items.length; i += size) {
     chunks.push(items.slice(i, i + size));

@@ -190,4 +190,13 @@
   .field-chip-active {
     @apply border-primary/40 bg-primary/10 text-primary;
   }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
 }

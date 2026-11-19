@@ -17,7 +17,7 @@ export function ModeSwitcher({
 }) {
   return (
     <div
-      className="flex w-full items-center overflow-x-auto rounded-full border border-border/60 bg-muted/35 p-1 shadow-sm dark:border-white/10 dark:bg-white/[0.06]"
+      className="no-scrollbar flex w-full items-center overflow-x-auto overflow-y-hidden rounded-full border border-border/60 bg-muted/35 p-1 dark:border-white/10 dark:bg-white/[0.06]"
       role="tablist"
       aria-label="Choose a tool"
     >
@@ -31,7 +31,7 @@ export function ModeSwitcher({
             aria-selected={selected}
             title={tab.hint}
             aria-label={`${tab.label}: ${tab.hint}`}
-            className={`flex min-h-11 min-w-0 shrink-0 items-center justify-center gap-1 whitespace-nowrap rounded-full px-2.5 py-2 text-[11px] font-semibold transition-colors min-[400px]:text-xs sm:flex-1 sm:gap-1.5 sm:px-0.5 sm:text-sm ${
+            className={`flex min-h-11 min-w-0 flex-1 items-center justify-center gap-0.5 whitespace-nowrap rounded-full px-1 py-2 text-[11px] font-semibold transition-colors min-[400px]:gap-1 min-[400px]:px-1.5 min-[400px]:text-xs sm:gap-1.5 sm:px-0.5 sm:text-sm ${
               selected
                 ? "bg-card text-foreground shadow-md dark:bg-white/15"
                 : "text-muted-foreground hover:text-foreground/90"

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  DEFAULT_CHUNK_SIZE,
   chunkList,
   cleanUrl,
   emailDomain,
@@ -7,6 +8,7 @@ import {
   extractUrlsChunked,
   filterPersonal,
   isPersonalEmail,
+  parseChunkSize,
 } from "./extract";
 
 describe("extract", () => {
@@ -60,5 +62,15 @@ describe("extract", () => {
 
   it("chunks with a default-safe size", () => {
     expect(chunkList(["a", "b", "c"], 2)).toEqual([["a", "b"], ["c"]]);
+  });
+
+  it("defaults empty or invalid chunk sizes to 5000", () => {
+    expect(DEFAULT_CHUNK_SIZE).toBe(5000);
+    expect(parseChunkSize("")).toBe(5000);
+    expect(parseChunkSize("   ")).toBe(5000);
+    expect(parseChunkSize(0)).toBe(5000);
+    expect(parseChunkSize(-3)).toBe(5000);
+    expect(parseChunkSize("12")).toBe(12);
+    expect(parseChunkSize(12.9)).toBe(12);
   });
 });

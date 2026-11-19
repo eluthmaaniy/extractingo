@@ -10,11 +10,13 @@ import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 import { dedupeJob, extractEmailsJob, extractUrlsJob, linesJob } from "@/lib/extractClient";
+import { copyLines, downloadCsv, downloadTxt } from "@/lib/clipboard";
 import {
   DEFAULT_CHUNK_SIZE,
   LARGE_INPUT_THRESHOLD,
   chunkList,
   filterPersonal,
+  parseChunkSize,
   type PersonalFilter,
 } from "@/lib/extract";
 import { ACCEPTED_EXTENSIONS, readSourceFiles } from "@/lib/files";
@@ -89,7 +91,8 @@ export function Workspace() {
   const [dragging, setDragging] = useState(false);
   const [unique, setUnique] = useState(true);
   const [personalFilter, setPersonalFilter] = useState<PersonalFilter>("all");
-  const [chunkSize, setChunkSize] = useState(DEFAULT_CHUNK_SIZE);
+  const [chunkInput, setChunkInput] = useState(String(DEFAULT_CHUNK_SIZE));
+  const chunkSize = parseChunkSize(chunkInput);
   const [processing, setProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [extracted, setExtracted] = useState<ExtractedFlags>(emptyExtracted);
@@ -288,7 +291,7 @@ export function Workspace() {
         setFileNames(session.fileNames);
         setUnique(session.unique);
         setPersonalFilter(session.personalFilter);
-        setChunkSize(session.chunkSize);
+        setChunkInput(String(session.chunkSize ?? DEFAULT_CHUNK_SIZE));
         setExtracted({ ...emptyExtracted(), ...(session.extracted ?? {}) });
         setPersonal(session.personal);
         setDomain(session.domain);
@@ -524,17 +527,11 @@ export function Workspace() {
               </button>
             ))}
           </div>
-          <label className="flex w-full flex-col gap-1.5 text-sm text-muted-foreground sm:flex-row sm:items-center sm:gap-2">
-            Emails per result chunk
-            <Input
-              type="number"
-              min={1}
-              inputMode="numeric"
-              className="h-11 w-full sm:h-9 sm:w-28"
-              value={chunkSize}
-              onChange={(e) => setChunkSize(Math.max(1, Number(e.target.value) || DEFAULT_CHUNK_SIZE))}
-            />
-          </label>
+          <ChunkSizeField
+            label="Emails per result chunk"
+            value={chunkInput}
+            onChange={setChunkInput}
+          />
         </div>
       )}
 
@@ -550,17 +547,11 @@ export function Workspace() {
       )}
 
       {mode === "segment" && (
-        <label className="flex w-full flex-col gap-1.5 text-sm text-muted-foreground sm:flex-row sm:items-center sm:gap-2">
-          Emails per segment
-          <Input
-            type="number"
-            min={1}
-            inputMode="numeric"
-            className="h-11 w-full sm:h-9 sm:w-28"
-            value={chunkSize}
-            onChange={(e) => setChunkSize(Math.max(1, Number(e.target.value) || DEFAULT_CHUNK_SIZE))}
-          />
-        </label>
+        <ChunkSizeField
+          label="Emails per segment"
+          value={chunkInput}
+          onChange={setChunkInput}
+        />
       )}
 
       <div className="flex gap-2">
@@ -660,9 +651,37 @@ export function Workspace() {
 
       {done && !processing && mode === "segment" && (
         <div className="space-y-4">
-          <p className="text-sm text-muted-foreground">
-            {segments.reduce((n, s) => n + s.length, 0).toLocaleString()} lines in {segments.length} segment(s).
-          </p>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm text-muted-foreground">
+              {segments.reduce((n, s) => n + s.length, 0).toLocaleString()} lines in {segments.length} segment(s).
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => copyLines(segments.flat(), "Full list copied")}
+              >
+                <i className="ri-file-copy-line" aria-hidden />
+                Copy all
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => downloadTxt(segments.flat(), "split_list.txt")}
+              >
+                <i className="ri-download-line" aria-hidden />
+                All .txt
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => downloadCsv(segments.flat(), "split_list.csv")}
+              >
+                <i className="ri-file-excel-2-line" aria-hidden />
+                All .csv
+              </Button>
+            </div>
+          </div>
           {visibleSegments.map((seg, i) => (
             <ResultPane
               key={i}
@@ -674,12 +693,39 @@ export function Workspace() {
           ))}
           {segments.length > visibleSegments.length && (
             <p className="text-center text-xs text-muted-foreground">
-              Showing the first {visibleSegments.length} segments. Download each piece from the buttons above, or
-              raise emails per segment.
+              Showing the first {visibleSegments.length} segments. Download the full list above, or each visible
+              piece below.
             </p>
           )}
         </div>
       )}
     </section>
+  );
+}
+
+function ChunkSizeField({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (next: string) => void;
+}) {
+  return (
+    <label className="flex w-full flex-col gap-1.5 text-sm text-muted-foreground sm:flex-row sm:items-center sm:gap-2">
+      {label}
+      <Input
+        type="text"
+        inputMode="numeric"
+        pattern="[0-9]*"
+        autoComplete="off"
+        placeholder={String(DEFAULT_CHUNK_SIZE)}
+        className="h-11 w-full sm:h-9 sm:w-28"
+        value={value}
+        onChange={(e) => onChange(e.target.value.replace(/[^\d]/g, ""))}
+        aria-label={label}
+      />
+    </label>
   );
 }

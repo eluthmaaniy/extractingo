@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { DEFAULT_CHUNK_SIZE, chunkList, displayText } from "@/lib/extract";
+import { chunkList, displayText, parseChunkSize } from "@/lib/extract";
 import { copyLines, downloadCsv, downloadTxt } from "@/lib/clipboard";
 import { cn } from "@/lib/utils";
 
@@ -17,10 +17,11 @@ export function ResultPane({
   chunkSize: number;
   csvColumn?: string;
 }) {
-  const size = Math.max(1, chunkSize || DEFAULT_CHUNK_SIZE);
+  const size = parseChunkSize(chunkSize);
   const chunks = useMemo(() => chunkList(lines, size), [lines, size]);
   const [chunkIndex, setChunkIndex] = useState(0);
-  const active = chunks[Math.min(chunkIndex, Math.max(chunks.length - 1, 0))] ?? [];
+  const safeIndex = Math.min(chunkIndex, Math.max(chunks.length - 1, 0));
+  const active = chunks[safeIndex] ?? [];
 
   if (lines.length === 0) {
     return (
@@ -30,7 +31,7 @@ export function ResultPane({
     );
   }
 
-  const safeIndex = Math.min(chunkIndex, chunks.length - 1);
+  const manyChunks = chunks.length > 1;
 
   return (
     <div className="space-y-3">
@@ -46,38 +47,58 @@ export function ResultPane({
           </Button>
           <Button variant="outline" size="sm" onClick={() => downloadTxt(lines, `${fileSlug}.txt`)}>
             <i className="ri-download-line" aria-hidden />
-            .txt
+            All .txt
           </Button>
           <Button variant="outline" size="sm" onClick={() => downloadCsv(lines, `${fileSlug}.csv`, csvColumn)}>
             <i className="ri-file-excel-2-line" aria-hidden />
-            .csv
+            All .csv
           </Button>
         </div>
       </div>
 
-      {chunks.length > 1 && (
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-xs text-muted-foreground">
-            Chunk {safeIndex + 1} of {chunks.length} ({active.length.toLocaleString()} in this chunk)
-          </span>
-          <div className="flex flex-wrap gap-1.5">
-            {chunks.slice(0, 24).map((_, i) => (
-              <button
-                key={i}
-                type="button"
-                onClick={() => setChunkIndex(i)}
-                className={cn(
-                  "field-chip",
-                  i === safeIndex && "field-chip-active",
-                )}
-              >
-                {i + 1}
-              </button>
-            ))}
+      {manyChunks && (
+        <div className="space-y-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs text-muted-foreground">
+              Chunk {safeIndex + 1} of {chunks.length} ({active.length.toLocaleString()} in this chunk)
+            </span>
+            <div className="flex flex-wrap gap-1.5">
+              {chunks.slice(0, 24).map((_, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => setChunkIndex(i)}
+                  className={cn(
+                    "field-chip",
+                    i === safeIndex && "field-chip-active",
+                  )}
+                >
+                  {i + 1}
+                </button>
+              ))}
+            </div>
           </div>
-          <Button variant="outline" size="sm" onClick={() => copyLines(active, `Chunk ${safeIndex + 1} copied`)}>
-            Copy chunk
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" size="sm" onClick={() => copyLines(active, `Chunk ${safeIndex + 1} copied`)}>
+              Copy chunk
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => downloadTxt(active, `${fileSlug}_chunk_${safeIndex + 1}.txt`)}
+            >
+              <i className="ri-download-line" aria-hidden />
+              Chunk .txt
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => downloadCsv(active, `${fileSlug}_chunk_${safeIndex + 1}.csv`, csvColumn)}
+            >
+              <i className="ri-file-excel-2-line" aria-hidden />
+              Chunk .csv
+            </Button>
+          </div>
         </div>
       )}
 
