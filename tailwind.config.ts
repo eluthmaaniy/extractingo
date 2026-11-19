@@ -55,12 +55,12 @@ export default {
         mono: ["var(--font-mono)"],
       },
       fontSize: {
-        xs: ["0.75rem", { lineHeight: "1rem", letterSpacing: "0.006em" }],
-        sm: ["0.875rem", { lineHeight: "1.25rem", letterSpacing: "-0.006em" }],
-        base: ["0.9375rem", { lineHeight: "1.35rem", letterSpacing: "-0.011em" }],
-        lg: ["1.0625rem", { lineHeight: "1.35rem", letterSpacing: "-0.018em" }],
-        xl: ["1.25rem", { lineHeight: "1.4rem", letterSpacing: "-0.021em" }],
-        "2xl": ["1.375rem", { lineHeight: "1.3rem", letterSpacing: "-0.024em" }],
+        xs: ["0.6875rem", { lineHeight: "1rem", letterSpacing: "0.006em" }],
+        sm: ["0.8125rem", { lineHeight: "1.2rem", letterSpacing: "-0.006em" }],
+        base: ["0.875rem", { lineHeight: "1.3rem", letterSpacing: "-0.011em" }],
+        lg: ["1rem", { lineHeight: "1.3rem", letterSpacing: "-0.018em" }],
+        xl: ["1.125rem", { lineHeight: "1.35rem", letterSpacing: "-0.021em" }],
+        "2xl": ["1.25rem", { lineHeight: "1.25rem", letterSpacing: "-0.024em" }],
       },
       fontWeight: {
         normal: "400",

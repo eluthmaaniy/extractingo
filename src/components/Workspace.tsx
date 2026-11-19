@@ -38,6 +38,13 @@ function previewSource(source: string): string {
   );
 }
 
+function formatSourceSize(source: string): string {
+  const kb = source.length / 1024;
+  if (kb < 1) return `${source.length} characters`;
+  if (kb < 1024) return `${kb < 10 ? kb.toFixed(1) : Math.round(kb)} KB`;
+  return `${(kb / 1024).toFixed(1)} MB`;
+}
+
 const PLACEHOLDERS: Record<WorkspaceMode, string> = {
   emails: "Paste mixed text, a crawl, or an email list…",
   urls: "Paste text that contains http(s) links…",
@@ -48,11 +55,11 @@ const PLACEHOLDERS: Record<WorkspaceMode, string> = {
 const DROP_COPY: Record<WorkspaceMode, { title: string; subtitle: string }> = {
   emails: {
     title: "Drop files or click to browse",
-    subtitle: ".txt, .csv, .pdf, .docx — addresses are found in the file, in this browser",
+    subtitle: ".txt, .csv, .pdf, .docx — the file is not pasted into the box. Extract below.",
   },
   urls: {
     title: "Drop a file that contains links",
-    subtitle: ".txt, .csv, .pdf, .docx — only the URL itself is kept",
+    subtitle: ".txt, .csv, .pdf, .docx — the file is not pasted into the box. Extract below.",
   },
   clean: {
     title: "Drop a finished list",
@@ -178,6 +185,21 @@ export function Workspace() {
     toast.success("Removed the list from this browser");
   };
 
+  const attachFileSource = (value: string, names: string[]) => {
+    bulkRef.current = value;
+    setBulkActive(true);
+    setText("");
+    setFileNames(names);
+  };
+
+  const pasteInstead = () => {
+    bulkRef.current = null;
+    setBulkActive(false);
+    setText("");
+    setFileNames([]);
+    resetResults();
+  };
+
   const loadFiles = async (files: File[], replaced: boolean) => {
     if (files.length === 0) return;
     toast.info(`Reading ${files.length === 1 ? files[0].name : `${files.length} files`}…`);
@@ -185,13 +207,12 @@ export function Workspace() {
     setProgress(0);
     try {
       const { text: next, names } = await readSourceFiles(files, setProgress);
-      setFileNames(names);
-      setSource(next);
+      attachFileSource(next, names);
       resetResults();
       if (replaced) {
         toast.success(`Replaced the previous list with ${names.join(", ")}. Not merged.`);
       } else {
-        toast.success(`Loaded ${(next.length / 1024).toFixed(0)} KB`);
+        toast.success(`Loaded ${names.join(", ")}. Use ${ACTIONS[mode].idle} below.`);
       }
     } catch (err) {
       console.error(err);
@@ -271,9 +292,15 @@ export function Workspace() {
     void loadSession().then((session) => {
       if (cancelled) return;
       if (session && !isSessionEmpty(session)) {
-        bulkRef.current = session.source.length > LARGE_INPUT_THRESHOLD ? session.source : null;
-        setBulkActive(session.source.length > LARGE_INPUT_THRESHOLD);
-        setText(session.source.length > LARGE_INPUT_THRESHOLD ? previewSource(session.source) : session.source);
+        if (session.fileNames.length > 0) {
+          bulkRef.current = session.source;
+          setBulkActive(true);
+          setText("");
+        } else {
+          bulkRef.current = session.source.length > LARGE_INPUT_THRESHOLD ? session.source : null;
+          setBulkActive(session.source.length > LARGE_INPUT_THRESHOLD);
+          setText(session.source.length > LARGE_INPUT_THRESHOLD ? previewSource(session.source) : session.source);
+        }
         setFileNames(session.fileNames);
         setUnique(session.unique);
         setPersonalFilter(session.personalFilter);
@@ -455,31 +482,50 @@ export function Workspace() {
             }}
           />
         </label>
-        {fileNames.length > 0 && (
-          <p className="mt-3 text-center text-xs text-muted-foreground">{fileNames.join(", ")}</p>
-        )}
       </div>
 
-      <div className="space-y-1.5">
-        <Textarea
-          className="min-h-[140px] bg-card font-mono text-base dark:bg-card sm:text-xs"
-          placeholder={PLACEHOLDERS[mode]}
-          value={text}
-          readOnly={bulkActive}
-          onChange={(e) => {
-            setFileNames([]);
-            setSource(e.target.value);
-            resetResults();
-          }}
-          aria-label="Source text"
-        />
-        {bulkActive && (
-          <p className="text-xs text-muted-foreground">
-            Full file is kept for extraction. The box is a preview (not editable) so a second paste cannot mix into it.
-            Use Replace or Clear instead.
+      {fileNames.length > 0 ? (
+        <div className="space-y-2 rounded-xl border border-border/70 bg-muted/20 px-4 py-3">
+          <p className="text-sm font-medium text-foreground">
+            {fileNames.join(", ")}
+            <span className="ml-2 font-normal text-muted-foreground">
+              {formatSourceSize(sourceText())} in this browser
+            </span>
           </p>
-        )}
-      </div>
+          <p className="text-xs leading-relaxed text-muted-foreground">
+            The paste box is for typing only, so this file is not shown there. Use{" "}
+            <span className="font-medium text-foreground">{action.idle}</span> below — that is the result list.
+          </p>
+          <button
+            type="button"
+            className="text-xs font-medium text-primary hover:underline"
+            onClick={pasteInstead}
+          >
+            Paste text instead
+          </button>
+        </div>
+      ) : (
+        <div className="space-y-1.5">
+          <Textarea
+            className="min-h-[140px] bg-card font-mono text-[16px] dark:bg-card sm:text-xs"
+            placeholder={PLACEHOLDERS[mode]}
+            value={text}
+            readOnly={bulkActive}
+            onChange={(e) => {
+              setFileNames([]);
+              setSource(e.target.value);
+              resetResults();
+            }}
+            aria-label="Paste text"
+          />
+          {bulkActive && (
+            <p className="text-xs text-muted-foreground">
+              Full paste is kept for extraction. The box is a preview (not editable) so a second paste cannot mix into
+              it. Use Replace or Clear instead.
+            </p>
+          )}
+        </div>
+      )}
 
       {mode === "emails" && (
         <div className="space-y-3">

@@ -24,7 +24,7 @@
   }
 
   body {
-    font-size: 15px;
+    font-size: 14px;
     font-weight: var(--weight-regular);
     line-height: 1.45;
     letter-spacing: var(--tracking-body);
@@ -42,9 +42,9 @@
     line-height: 1.25;
   }
 
-  h1 { font-size: 22px; font-weight: var(--weight-bold); letter-spacing: -0.024em; }
-  h2 { font-size: 17px; }
-  h3 { font-size: 15px; letter-spacing: -0.014em; }
+  h1 { font-size: 18px; font-weight: var(--weight-bold); letter-spacing: -0.024em; }
+  h2 { font-size: 15px; }
+  h3 { font-size: 14px; letter-spacing: -0.014em; }
 
   button, input, textarea, select {
     font-family: inherit;

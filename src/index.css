@@ -168,7 +168,7 @@
   }
 
   .gmail-input {
-    @apply rounded-xl border border-border/80 px-4 py-3 min-h-[2.75rem] font-sans text-[15px] font-normal;
+    @apply rounded-xl border border-border/80 px-4 py-3 min-h-[2.75rem] font-sans text-[16px] font-normal sm:text-[13px];
     @apply transition-all duration-150 bg-white/90;
   }
 

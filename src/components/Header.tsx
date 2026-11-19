@@ -15,7 +15,7 @@ export function Header({
         <div className="flex min-w-0 items-center gap-3">
           <img src={SCOUTIER_LOGO_URL} alt="" className="h-6 w-6 shrink-0" width={24} height={24} />
           <div className="min-w-0">
-            <p className="truncate text-lg font-bold leading-none tracking-tight text-foreground">Extractingo</p>
+            <p className="truncate text-base font-bold leading-none tracking-tight text-foreground">Extractingo</p>
             <a
               href={SCOUTIER_SITE_URL}
               className="mt-1 inline-flex items-center text-[11px] font-medium text-success hover:underline"
