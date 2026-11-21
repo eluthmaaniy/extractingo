@@ -8,7 +8,8 @@ import { copyLines, downloadTxt } from "@/lib/clipboard";
 import { downloadLinesAsFile, MAX_DISPLAY } from "@/lib/extract";
 import { policyHitsToCsv, type PolicyHit } from "@/lib/policyHtml";
 import { runPolicyJobs, runPolicyJobsHere, type PolicyJob } from "@/lib/policyJob";
-import { listPolicyTargets } from "@/lib/policyUrl";
+import { readSourceFile } from "@/lib/files";
+import { jobsFromStoreList } from "@/lib/parseStoreList";
 import {
   clearPolicySession,
   loadPolicySession,
@@ -47,21 +48,8 @@ function lineCountOf(text: string): number {
   return text.split(/\r?\n/).filter((line) => line.trim()).length;
 }
 
-function jobsFromSource(source: string): { jobs: PolicyJob[]; invalid: number } {
-  const targets = listPolicyTargets(source);
-  const jobs: PolicyJob[] = [];
-  const seen = new Set<string>();
-  let invalid = 0;
-  for (const target of targets) {
-    if (target.reason !== "ok" || !target.url || !target.host) {
-      invalid += 1;
-      continue;
-    }
-    if (seen.has(target.host)) continue;
-    seen.add(target.host);
-    jobs.push({ host: target.host, url: target.url });
-  }
-  return { jobs, invalid };
+function jobsFromSource(source: string): { jobs: PolicyJob[]; invalid: number; listed: number; shops: number } {
+  return jobsFromStoreList(source);
 }
 
 function remainingLabel(started: number, done: number, total: number, retrying: boolean): string {
@@ -105,6 +93,7 @@ export function StoresTool({ runRef }: { runRef: MutableRefObject<() => void> })
   const [source, setSource] = useState("");
   const [fileName, setFileName] = useState("");
   const [listed, setListed] = useState(0);
+  const [shops, setShops] = useState(0);
   const [bulk, setBulk] = useState(false);
   const [hits, setHits] = useState<PolicyHit[]>([]);
   const [recent, setRecent] = useState<StoreNote[]>([]);
@@ -143,8 +132,10 @@ export function StoresTool({ runRef }: { runRef: MutableRefObject<() => void> })
 
   const remember = (text: string, name: string) => {
     sourceRef.current = text;
+    const parsed = jobsFromStoreList(text);
     const lines = lineCountOf(text);
     setListed(lines);
+    setShops(parsed.shops);
     setFileName(name);
     if (lines > BULK_LINES) {
       setBulk(true);
@@ -159,8 +150,15 @@ export function StoresTool({ runRef }: { runRef: MutableRefObject<() => void> })
     if (!file || running) return;
     setFileName(file.name);
     setListed(0);
-    void file.text().then((text) => {
+    setShops(0);
+    void readSourceFile(file).then((text) => {
       remember(text, file.name);
+      const parsed = jobsFromStoreList(text);
+      if (parsed.listed > 0 && parsed.shops === 0) {
+        toast.error("None of those rows look like store URLs. Use a CSV with a Website or URL column.");
+      } else if (parsed.listed - parsed.shops >= 10) {
+        toast.message(`${parsed.shops.toLocaleString()} shops in this file. ${Math.max(0, parsed.listed - parsed.shops).toLocaleString()} other rows were skipped.`);
+      }
       setHits([]);
       setMisses([]);
       setOthers([]);
@@ -170,6 +168,8 @@ export function StoresTool({ runRef }: { runRef: MutableRefObject<() => void> })
       emptyRef.current = 0;
       seenHit.current = new Set();
       resetRunView();
+    }).catch(() => {
+      toast.error("Could not read that file.");
     });
   };
 
@@ -352,7 +352,8 @@ export function StoresTool({ runRef }: { runRef: MutableRefObject<() => void> })
     }
     setRunning(true);
     window.setTimeout(() => {
-      const { jobs, invalid } = jobsFromSource(text);
+      const { jobs, invalid, shops: foundShops } = jobsFromSource(text);
+      setShops(foundShops);
       if (jobs.length === 0) {
         setRunning(false);
         toast.error(invalid ? "None of those lines are web addresses." : "Paste at least one store URL.");
@@ -379,6 +380,7 @@ export function StoresTool({ runRef }: { runRef: MutableRefObject<() => void> })
     setSource("");
     setFileName("");
     setListed(0);
+    setShops(0);
     setBulk(false);
     setHits([]);
     setMisses([]);
@@ -473,16 +475,18 @@ export function StoresTool({ runRef }: { runRef: MutableRefObject<() => void> })
         }}
       >
         <label className="flex cursor-pointer flex-col items-center gap-1 text-center">
-          <span className="text-[13px] font-medium text-foreground">{fileName ? fileName : "Drop a .txt or .csv of store URLs"}</span>
+          <span className="text-[13px] font-medium text-foreground">{fileName ? fileName : "Drop a list of store URLs"}</span>
           <span className="text-xs font-normal text-muted-foreground">
             {listed
-              ? `${listed.toLocaleString()} lines. One shop per line.`
-              : "Or paste the list below. shop.myshopify.com works too."}
+              ? shops
+                ? `${shops.toLocaleString()} shops from ${listed.toLocaleString()} lines.`
+                : `${listed.toLocaleString()} lines. No shop URLs yet.`
+              : "TXT, CSV, TSV, PDF or Word. CSV exports with a Website column work."}
           </span>
           <Input
             ref={fileRef}
             type="file"
-            accept=".txt,.csv,text/plain"
+            accept=".txt,.csv,.tsv,.pdf,.docx,text/plain,text/csv,text/tab-separated-values"
             className="sr-only"
             disabled={!hydrated || running}
             onChange={(event) => {
@@ -503,6 +507,7 @@ export function StoresTool({ runRef }: { runRef: MutableRefObject<() => void> })
           setSource(next);
           setBulk(false);
           setListed(lineCountOf(next));
+          setShops(jobsFromStoreList(next).shops);
           setFileName("");
         }}
         aria-label="Store URLs, one per line"
