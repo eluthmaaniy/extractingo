@@ -6,7 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 import { copyLines, downloadTxt } from "@/lib/clipboard";
 import { downloadLinesAsFile, MAX_DISPLAY } from "@/lib/extract";
-import { policyHitsToCsv, type PolicyHit } from "@/lib/policyHtml";
+import { policyHitsToCsv, policyHitsToScoutierCsv, type PolicyHit } from "@/lib/policyHtml";
 import { runPolicyJobs, runPolicyJobsHere, type PolicyJob } from "@/lib/policyJob";
 import { readSourceFile } from "@/lib/files";
 import { jobsFromStoreList } from "@/lib/parseStoreList";
@@ -612,6 +612,36 @@ export function StoresTool({ runRef }: { runRef: MutableRefObject<() => void> })
                 <i className="ri-file-excel-2-line" aria-hidden />
                 .csv
               </Button>
+            </div>
+          </div>
+          <div className="flex items-start gap-2.5 rounded-lg border border-primary/30 bg-primary/10 px-3 py-2.5">
+            <i className="ri-store-2-line mt-0.5 text-base text-primary" aria-hidden />
+            <div className="min-w-0 flex-1 space-y-2">
+              <p className="text-xs leading-relaxed text-foreground">
+                For Scoutier URL Scout. This file keeps each email with its store so {"{website}"} and {"{url}"} fill
+                in. Upload it on the URLs tab — you do not run Find emails.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => copyLines(policyHitsToScoutierCsv(hits), "Scoutier CSV copied")}
+                >
+                  <i className="ri-file-copy-line" aria-hidden />
+                  Copy Scoutier CSV
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    downloadLinesAsFile(policyHitsToScoutierCsv(hits), "scoutier-url-scout.csv", "text/csv");
+                    toast.success("Scoutier CSV download started");
+                  }}
+                >
+                  <i className="ri-download-line" aria-hidden />
+                  Scoutier .csv
+                </Button>
+              </div>
             </div>
           </div>
           <ul className="max-h-[46vh] overflow-auto rounded-xl border border-border/70 bg-muted/40">

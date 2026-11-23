@@ -29,3 +29,31 @@ export function csvCell(value: string): string {
 export function policyHitsToCsv(hits: PolicyHit[]): string[] {
   return ["store,policy_url,email", ...hits.map((hit) => [hit.store, hit.policyUrl, hit.email].map(csvCell).join(","))];
 }
+
+/** Host without www, same idea as Scoutier URL Scout `hostLabelFromUrl`. */
+export function hostLabelFromUrl(raw: string): string {
+  const trimmed = raw.trim();
+  if (!trimmed) return "";
+  try {
+    const withProto = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+    return new URL(withProto).hostname.toLowerCase().replace(/^www\./, "");
+  } catch {
+    return trimmed
+      .replace(/^https?:\/\//i, "")
+      .replace(/^www\./i, "")
+      .split("/")[0]
+      ?.toLowerCase() ?? trimmed;
+  }
+}
+
+/** Scoutier URL Scout file: each email stays with its store so `{website}` and `{url}` fill in. */
+export function policyHitsToScoutierCsv(hits: PolicyHit[]): string[] {
+  return [
+    "email,website,url",
+    ...hits.map((hit) => {
+      const website = hostLabelFromUrl(hit.policyUrl || hit.store);
+      const url = hit.policyUrl.trim() || `https://${hit.store.replace(/^https?:\/\//i, "").replace(/\/$/, "")}/`;
+      return [hit.email, website, url].map(csvCell).join(",");
+    }),
+  ];
+}

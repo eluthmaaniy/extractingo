@@ -107,7 +107,7 @@ export const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "How do I pull the contact email from a store privacy policy?",
-    a: "Open Stores and paste Shopify store URLs, one per line. Find emails reads each store's public privacy policy in your browser and lists the addresses. You do not open the policy pages. Stores that are not on Shopify, or policies with no email address, are marked on that row. Nothing is uploaded.",
+    a: "Open Stores and paste Shopify store URLs, one per line. Find emails reads each store's public privacy policy in your browser and lists the addresses. You do not open the policy pages. Stores that are not on Shopify, or policies with no email address, are marked on that row. Stores also has a Scoutier file that keeps each email with its store. Nothing is uploaded.",
   },
 ];
 

@@ -32,7 +32,7 @@ const COPY: Record<
     title: "Store policy emails",
     tagline: "Paste Shopify store URLs. Extractingo reads each privacy policy and lists the contact emails.",
     steps: ["Drop or paste store URLs", "Find emails", "Copy or download the list"],
-    hint: "Shopify stores only. CSV exports with a Website or URL column work. A long list stays on one progress line. The policy text is not kept.",
+    hint: "Shopify stores only. CSV exports with a Website or URL column work. A long list stays on one progress line. The policy text is not kept. Stores has a Scoutier file that keeps each email with its store.",
   },
 };
 
