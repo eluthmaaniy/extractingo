@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { chunkList, displayText, parseChunkSize } from "@/lib/extract";
+import { MAX_DISPLAY, chunkList, parseChunkSize } from "@/lib/extract";
 import { copyLines, downloadCsv, downloadTxt } from "@/lib/clipboard";
 import { cn } from "@/lib/utils";
 
@@ -102,9 +102,19 @@ export function ResultPane({
         </div>
       )}
 
-      <pre className="max-h-[46vh] overflow-auto whitespace-pre-wrap break-all rounded-xl border border-border/70 bg-muted/40 p-3 font-mono text-xs leading-5 text-foreground">
-        {displayText(active.length ? active : lines)}
-      </pre>
+      <ul className="max-h-[46vh] overflow-auto rounded-xl border border-border/70 bg-muted/40 font-mono text-xs leading-5 text-foreground">
+        {(active.length ? active : lines).slice(0, MAX_DISPLAY).map((line, index) => (
+          <li key={`${index}-${line}`} className="border-b border-border/50 px-3 py-1.5 break-all last:border-b-0">
+            {line}
+          </li>
+        ))}
+        {(active.length ? active : lines).length > MAX_DISPLAY && (
+          <li className="px-3 py-2 text-muted-foreground">
+            … and {((active.length ? active : lines).length - MAX_DISPLAY).toLocaleString()} more (use Download for the
+            full list)
+          </li>
+        )}
+      </ul>
     </div>
   );
 }

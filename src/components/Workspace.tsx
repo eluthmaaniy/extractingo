@@ -28,6 +28,7 @@ import {
   loadSession,
   saveSession,
   type ExtractedFlags,
+  type UrlDelivery,
   type WorkspaceSession,
 } from "@/lib/session";
 import { cn } from "@/lib/utils";
@@ -43,7 +44,7 @@ function previewSource(source: string): string {
 
 const PLACEHOLDERS: Record<WorkspaceMode, string> = {
   emails: "Paste mixed text, a crawl, or an email list…",
-  urls: "Paste text that contains http(s) links…",
+  urls: "Paste text or a file. Numbers and other words are ignored — only the links stay.",
   clean: "Paste one email or URL per line…",
   segment: "Paste a cleaned list, one email per line…",
   stores: "Paste one store URL per line…",
@@ -92,6 +93,7 @@ export function Workspace() {
   const [unique, setUnique] = useState(true);
   const [personalFilter, setPersonalFilter] = useState<PersonalFilter>("all");
   const [chunkInput, setChunkInput] = useState(String(DEFAULT_CHUNK_SIZE));
+  const [urlDelivery, setUrlDelivery] = useState<UrlDelivery>("all");
   const chunkSize = parseChunkSize(chunkInput);
   const [processing, setProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -154,6 +156,7 @@ export function Workspace() {
     dupStats,
     segments,
     bucket,
+    urlDelivery,
   });
 
   sessionRef.current = snapshot();
@@ -185,8 +188,8 @@ export function Workspace() {
   };
 
   const attachFileSource = (value: string, names: string[]) => {
-    bulkRef.current = value;
     setFileNames(names);
+    setSource(value);
   };
 
   const loadFiles = async (files: File[]) => {
@@ -279,19 +282,12 @@ export function Workspace() {
     void loadSession().then((session) => {
       if (cancelled) return;
       if (session && !isSessionEmpty(session)) {
-        if (session.fileNames.length > 0) {
-          bulkRef.current = session.source;
-          setBulkActive(false);
-          setText("");
-        } else {
-          bulkRef.current = session.source.length > LARGE_INPUT_THRESHOLD ? session.source : null;
-          setBulkActive(session.source.length > LARGE_INPUT_THRESHOLD);
-          setText(session.source.length > LARGE_INPUT_THRESHOLD ? previewSource(session.source) : session.source);
-        }
         setFileNames(session.fileNames);
+        setSource(session.source);
         setUnique(session.unique);
         setPersonalFilter(session.personalFilter);
         setChunkInput(String(session.chunkSize ?? DEFAULT_CHUNK_SIZE));
+        setUrlDelivery(session.urlDelivery === "chunks" ? "chunks" : "all");
         setExtracted({ ...emptyExtracted(), ...(session.extracted ?? {}) });
         setPersonal(session.personal);
         setDomain(session.domain);
@@ -364,6 +360,7 @@ export function Workspace() {
     dupStats,
     segments,
     bucket,
+    urlDelivery,
   ]);
 
   useEffect(() => {
@@ -536,14 +533,37 @@ export function Workspace() {
       )}
 
       {mode === "urls" && (
-        <button
-          type="button"
-          className={cn("field-chip", unique && "field-chip-active")}
-          aria-pressed={unique}
-          onClick={() => setUnique((v) => !v)}
-        >
-          Unique URLs
-        </button>
+        <div className="space-y-3">
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              className={cn("field-chip", unique && "field-chip-active")}
+              aria-pressed={unique}
+              onClick={() => setUnique((v) => !v)}
+            >
+              Unique URLs
+            </button>
+            <button
+              type="button"
+              className={cn("field-chip", urlDelivery === "all" && "field-chip-active")}
+              aria-pressed={urlDelivery === "all"}
+              onClick={() => setUrlDelivery("all")}
+            >
+              All at once
+            </button>
+            <button
+              type="button"
+              className={cn("field-chip", urlDelivery === "chunks" && "field-chip-active")}
+              aria-pressed={urlDelivery === "chunks"}
+              onClick={() => setUrlDelivery("chunks")}
+            >
+              In chunks
+            </button>
+          </div>
+          {urlDelivery === "chunks" && (
+            <ChunkSizeField label="URLs per chunk" value={chunkInput} onChange={setChunkInput} />
+          )}
+        </div>
       )}
 
       {mode === "segment" && (
@@ -636,7 +656,21 @@ export function Workspace() {
       )}
 
       {done && !processing && mode === "urls" && (
-        <ResultPane title="URLs" lines={urls} fileSlug="extracted_urls" chunkSize={chunkSize} csvColumn="url" />
+        <div className="space-y-3">
+          <p className="text-sm text-muted-foreground">
+            Found {urls.length.toLocaleString()} URL{urls.length === 1 ? "" : "s"}.
+            {urlDelivery === "all"
+              ? " Showing all of them at once."
+              : ` Split into chunks of ${chunkSize.toLocaleString()}.`}
+          </p>
+          <ResultPane
+            title="URLs"
+            lines={urls}
+            fileSlug="extracted_urls"
+            chunkSize={urlDelivery === "all" ? Math.max(urls.length, 1) : chunkSize}
+            csvColumn="url"
+          />
+        </div>
       )}
 
       {done && !processing && mode === "clean" && (

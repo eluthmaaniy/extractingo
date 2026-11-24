@@ -1,5 +1,5 @@
 import type { WorkspaceMode } from "@/components/ModeSwitcher";
-import type { PersonalFilter } from "@/lib/extract";
+import { DEFAULT_CHUNK_SIZE, type PersonalFilter } from "@/lib/extract";
 
 export const SESSION_DB = "extractingo";
 export const SESSION_STORE = "session";
@@ -11,6 +11,7 @@ const LS_MAX_CHARS = 3_500_000;
 export type ExtractedFlags = Record<WorkspaceMode, boolean>;
 
 export type EmailBucket = "personal" | "domain";
+export type UrlDelivery = "all" | "chunks";
 
 export type WorkspaceSession = {
   version: typeof SESSION_VERSION;
@@ -29,6 +30,7 @@ export type WorkspaceSession = {
   dupStats: { total: number; removed: number };
   segments: string[][];
   bucket: EmailBucket;
+  urlDelivery?: UrlDelivery;
 };
 
 export const EMPTY_EXTRACTED: ExtractedFlags = {
@@ -58,6 +60,47 @@ export function formatSavedAgo(updatedAt: number, now = Date.now()): string {
   if (hours < 24) return `${hours}h ago`;
   const days = Math.round(hours / 24);
   return `${days}d ago`;
+}
+
+export function normalizeSession(value: WorkspaceSession): WorkspaceSession {
+  const raw = value as WorkspaceSession & { personal?: unknown; domain?: unknown; urls?: unknown };
+  return {
+    ...value,
+    fileNames: Array.isArray(value.fileNames) ? value.fileNames : [],
+    unique: value.unique !== false,
+    personalFilter: value.personalFilter ?? "all",
+    chunkSize: typeof value.chunkSize === "number" && value.chunkSize >= 1 ? value.chunkSize : DEFAULT_CHUNK_SIZE,
+    extracted: { ...emptyExtracted(), ...(value.extracted ?? {}) },
+    personal: Array.isArray(raw.personal) ? raw.personal.filter((item) => typeof item === "string") : [],
+    domain: Array.isArray(raw.domain) ? raw.domain.filter((item) => typeof item === "string") : [],
+    urls: Array.isArray(raw.urls) ? raw.urls.filter((item) => typeof item === "string") : [],
+    cleaned: Array.isArray(value.cleaned) ? value.cleaned.filter((item) => typeof item === "string") : [],
+    dupStats:
+      value.dupStats && typeof value.dupStats.total === "number" && typeof value.dupStats.removed === "number"
+        ? value.dupStats
+        : { total: 0, removed: 0 },
+    segments: Array.isArray(value.segments)
+      ? value.segments.filter(Array.isArray).map((segment) => segment.filter((item) => typeof item === "string"))
+      : [],
+    bucket: value.bucket === "domain" ? "domain" : "personal",
+    urlDelivery: value.urlDelivery === "chunks" ? "chunks" : "all",
+  };
+}
+
+export function newerRecord<T extends { updatedAt: number }>(a: T | null, b: T | null): T | null {
+  if (a && b) return a.updatedAt >= b.updatedAt ? a : b;
+  return a ?? b;
+}
+
+export function writeLocalJson(key: string, value: unknown, maxChars = LS_MAX_CHARS): "ok" | "quota" {
+  try {
+    const json = JSON.stringify(value);
+    if (json.length > maxChars) return "quota";
+    localStorage.setItem(key, json);
+    return "ok";
+  } catch {
+    return "quota";
+  }
 }
 
 export function isValidSession(value: unknown): value is WorkspaceSession {
@@ -92,7 +135,7 @@ function idbGet(): Promise<WorkspaceSession | null> {
         const request = db.transaction(SESSION_STORE, "readonly").objectStore(SESSION_STORE).get(SESSION_KEY);
         request.onsuccess = () => {
           const value = request.result;
-          resolve(isValidSession(value) ? value : null);
+          resolve(isValidSession(value) ? normalizeSession(value) : null);
         };
         request.onerror = () => reject(request.error);
       }),
@@ -126,20 +169,20 @@ function readLocalFallback(): WorkspaceSession | null {
     const raw = localStorage.getItem(SESSION_LS_KEY);
     if (!raw) return null;
     const parsed: unknown = JSON.parse(raw);
-    return isValidSession(parsed) ? parsed : null;
+    return isValidSession(parsed) ? normalizeSession(parsed) : null;
   } catch {
     return null;
   }
 }
 
 export async function loadSession(): Promise<WorkspaceSession | null> {
+  let fromIdb: WorkspaceSession | null = null;
   try {
-    const fromIdb = await idbGet();
-    if (fromIdb) return fromIdb;
+    fromIdb = await idbGet();
   } catch {
     /* fall through */
   }
-  return readLocalFallback();
+  return newerRecord(fromIdb, readLocalFallback());
 }
 
 export async function saveSession(session: WorkspaceSession): Promise<"ok" | "empty" | "quota"> {
@@ -147,23 +190,12 @@ export async function saveSession(session: WorkspaceSession): Promise<"ok" | "em
     await clearSession();
     return "empty";
   }
+  const local = writeLocalJson(SESSION_LS_KEY, session);
   try {
     await idbSet(session);
-    try {
-      localStorage.removeItem(SESSION_LS_KEY);
-    } catch {
-      /* ignore */
-    }
     return "ok";
   } catch {
-    try {
-      const json = JSON.stringify(session);
-      if (json.length > LS_MAX_CHARS) return "quota";
-      localStorage.setItem(SESSION_LS_KEY, json);
-      return "ok";
-    } catch {
-      return "quota";
-    }
+    return local === "ok" ? "ok" : "quota";
   }
 }
 

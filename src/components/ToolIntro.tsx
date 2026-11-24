@@ -12,9 +12,9 @@ const COPY: Record<
   },
   urls: {
     title: "URL extractor",
-    tagline: "Keeps only the URL itself — no nearby words, punctuation, or page copy.",
-    steps: ["Paste or drop a file with links", "Extract URLs", "Copy or download the clean list"],
-    hint: "Only http and https links are kept. Unique URLs removes repeats.",
+    tagline: "Pulls each link out of messy text or a file. Numbers and other words stay out.",
+    steps: ["Paste or drop a file", "See how many links were found", "Take them all at once, or in chunks"],
+    hint: "A privacy-policy path is not added. Unique URLs keeps one copy of each link. The list stays one link per line.",
   },
   clean: {
     title: "Duplicate remover",

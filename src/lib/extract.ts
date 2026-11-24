@@ -66,13 +66,53 @@ export function matchesPersonalFilter(email: string, filter: PersonalFilter): bo
 }
 
 const TRAILING_URL_JUNK = /[),.;:!?\]\}>'"]+$/g;
+const BARE_HOST_REGEX =
+  /(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,24}(?::\d{2,5})?(?:\/[^\s<>"'`]*)?/gi;
+/** File names look like hosts. They are not links. */
+const FILE_TLDS = new Set([
+  "txt",
+  "csv",
+  "pdf",
+  "doc",
+  "docx",
+  "json",
+  "js",
+  "css",
+  "png",
+  "jpg",
+  "jpeg",
+  "gif",
+  "webp",
+  "svg",
+  "html",
+  "xml",
+  "zip",
+  "mp4",
+  "mp3",
+  "md",
+  "ts",
+  "tsx",
+  "jsx",
+  "map",
+  "lock",
+  "yml",
+  "yaml",
+  "log",
+]);
+const POLICY_ONLY_PATHS = new Set(["/policies/privacy-policy", "/pages/privacy-policy"]);
 
-/** Drop surrounding punctuation so a sentence never sticks to the URL. */
+function policyOnlyPath(pathname: string): boolean {
+  const path = pathname.replace(/\/+$/, "") || "/";
+  return POLICY_ONLY_PATHS.has(path);
+}
+
+/** Drop surrounding punctuation so a sentence never sticks to the URL. Never invents a path. */
 export function cleanUrl(raw: string): string | null {
   let s = raw.trim().replace(TRAILING_URL_JUNK, "");
   while (s.endsWith(")") && (s.split(")").length - 1) > (s.split("(").length - 1)) {
     s = s.slice(0, -1);
   }
+  if (!/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(s)) s = `https://${s}`;
   let parsed: URL;
   try {
     parsed = new URL(s);
@@ -83,6 +123,13 @@ export function cleanUrl(raw: string): string | null {
   const host = parsed.hostname.toLowerCase();
   if (!host.includes(".") && host !== "localhost") return null;
   if (host.startsWith(".") || host.endsWith(".")) return null;
+  const tld = host.slice(host.lastIndexOf(".") + 1);
+  if (FILE_TLDS.has(tld)) return null;
+  if (policyOnlyPath(parsed.pathname)) {
+    parsed.pathname = "/";
+    parsed.search = "";
+    parsed.hash = "";
+  }
 
   const auth = parsed.username
     ? `${encodeURIComponent(parsed.username)}${parsed.password ? `:${encodeURIComponent(parsed.password)}` : ""}@`
@@ -138,13 +185,11 @@ export async function extractUrlsChunked(
   for (let i = 0; i < text.length; i += EXTRACT_CHUNK) {
     const sliceEnd = Math.min(i + EXTRACT_CHUNK + URL_OVERLAP, text.length);
     const slice = text.slice(i, sliceEnd);
-    const re = new RegExp(URL_FIND_REGEX.source, "gi");
-    let match: RegExpExecArray | null;
-    while ((match = re.exec(slice)) !== null) {
-      const abs = i + match.index;
-      if (abs >= i + EXTRACT_CHUNK && i + EXTRACT_CHUNK < text.length) continue;
-      const url = cleanUrl(match[0]);
-      if (!url) continue;
+    const chunkEnd = i + EXTRACT_CHUNK;
+    const push = (abs: number, raw: string) => {
+      if (abs >= chunkEnd && chunkEnd < text.length) return;
+      const url = cleanUrl(raw);
+      if (!url) return;
       if (unique) {
         if (!seen.has(url)) {
           seen.add(url);
@@ -153,6 +198,18 @@ export async function extractUrlsChunked(
       } else {
         results.push(url);
       }
+    };
+    const httpRe = new RegExp(URL_FIND_REGEX.source, "gi");
+    let match: RegExpExecArray | null;
+    while ((match = httpRe.exec(slice)) !== null) {
+      push(i + match.index, match[0]);
+    }
+    const bareRe = new RegExp(BARE_HOST_REGEX.source, "gi");
+    while ((match = bareRe.exec(slice)) !== null) {
+      const abs = i + match.index;
+      const prev = abs > 0 ? text[abs - 1] : "";
+      if (prev && /[\w@./]/.test(prev)) continue;
+      push(abs, match[0]);
     }
     onProgress?.(Math.min(99, Math.round(((i + EXTRACT_CHUNK) / len) * 100)));
     await yieldToMain();

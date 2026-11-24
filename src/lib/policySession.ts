@@ -1,4 +1,4 @@
-import { SESSION_DB, SESSION_STORE } from "@/lib/session";
+import { SESSION_DB, SESSION_STORE, newerRecord, writeLocalJson } from "@/lib/session";
 
 export const POLICY_SESSION_KEY = "policy";
 export const POLICY_LS_KEY = "extractingo-policy-session";
@@ -141,13 +141,7 @@ function idbClear(): Promise<void> {
   );
 }
 
-export async function loadPolicySession(): Promise<PolicySession | null> {
-  try {
-    const fromIdb = await idbGet();
-    if (fromIdb) return fromIdb;
-  } catch {
-    /* fall through */
-  }
+function readPolicyFallback(): PolicySession | null {
   try {
     const raw = localStorage.getItem(POLICY_LS_KEY);
     if (!raw) return null;
@@ -158,26 +152,27 @@ export async function loadPolicySession(): Promise<PolicySession | null> {
   }
 }
 
+export async function loadPolicySession(): Promise<PolicySession | null> {
+  let fromIdb: PolicySession | null = null;
+  try {
+    fromIdb = await idbGet();
+  } catch {
+    /* fall through */
+  }
+  return newerRecord(fromIdb, readPolicyFallback());
+}
+
 export async function savePolicySession(session: PolicySession): Promise<"ok" | "empty" | "quota"> {
   if (!session.source.trim() && session.hits.length === 0) {
     await clearPolicySession();
     return "empty";
   }
+  const local = writeLocalJson(POLICY_LS_KEY, session);
   try {
     await idbSet(session);
-    try {
-      localStorage.removeItem(POLICY_LS_KEY);
-    } catch {
-      /* ignore */
-    }
     return "ok";
   } catch {
-    try {
-      localStorage.setItem(POLICY_LS_KEY, JSON.stringify(session));
-      return "ok";
-    } catch {
-      return "quota";
-    }
+    return local === "ok" ? "ok" : "quota";
   }
 }
 

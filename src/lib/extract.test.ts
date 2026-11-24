@@ -49,15 +49,31 @@ describe("extract", () => {
     expect(urls).toEqual(["https://acme.io/a", "https://acme.io/b"]);
   });
 
-  it("does not treat plain words as URLs", async () => {
-    const urls = await extractUrlsChunked("contact sales at hello world example.com not a link");
-    expect(urls).toEqual([]);
+  it("keeps a bare domain and drops numbers, words, and file names", async () => {
+    const urls = await extractUrlsChunked(
+      "12 3400 notes.txt 99.5 hello world example.com not a link",
+    );
+    expect(urls).toEqual(["https://example.com"]);
+  });
+
+  it("keeps the real link and does not invent a privacy-policy path", async () => {
+    const urls = await extractUrlsChunked(
+      [
+        "1, https://Shop.example/policies/privacy-policy",
+        "2 https://shop.example/pages/privacy-policy",
+        "see https://www.Example.com/pricing",
+        "bare shop.example",
+      ].join("\n"),
+    );
+    expect(urls).toEqual(["https://shop.example", "https://www.example.com/pricing"]);
   });
 
   it("cleanUrl rejects junk", () => {
     expect(cleanUrl("https://ok.com/path")).toBe("https://ok.com/path");
     expect(cleanUrl("ftp://ok.com")).toBeNull();
     expect(cleanUrl("https://localhost/app")).toBe("https://localhost/app");
+    expect(cleanUrl("https://shop.example")).toBe("https://shop.example");
+    expect(cleanUrl("notes.txt")).toBeNull();
   });
 
   it("chunks with a default-safe size", () => {
