@@ -46,13 +46,42 @@ export function hostLabelFromUrl(raw: string): string {
   }
 }
 
+/** Shopify checkout / Shop app hosts — Scoutier import prefers the storefront over these. */
+export function isShopifyCheckoutHost(host: string): boolean {
+  const h = host.toLowerCase().replace(/^www\./, "");
+  return h === "checkout.shopify.com" || h === "shop.app" || h.endsWith(".shop.app");
+}
+
+function isStorefrontHref(raw: string): boolean {
+  const host = hostLabelFromUrl(raw);
+  return Boolean(host) && !isShopifyCheckoutHost(host);
+}
+
+/** Keep a storefront policy URL. Shopify sometimes returns checkout.shopify.com instead. */
+export function storefrontPolicyUrl(origin: string, candidates: (string | null | undefined)[]): string {
+  for (const candidate of candidates) {
+    const value = candidate?.trim();
+    if (value && isStorefrontHref(value)) return value;
+  }
+  const root = origin.replace(/\/+$/, "");
+  return `${root}/policies/privacy-policy`;
+}
+
+function scoutierSourceUrl(hit: PolicyHit): string {
+  const policy = hit.policyUrl.trim();
+  if (policy && isStorefrontHref(policy)) return policy;
+  const storeHost = hostLabelFromUrl(hit.store);
+  if (storeHost && !isShopifyCheckoutHost(storeHost)) return `https://${storeHost}/`;
+  return policy || (storeHost ? `https://${storeHost}/` : "");
+}
+
 /** Scoutier URL Scout file: each email stays with its store so `{website}` and `{url}` fill in. */
 export function policyHitsToScoutierCsv(hits: PolicyHit[]): string[] {
   return [
     "email,website,url",
     ...hits.map((hit) => {
-      const website = hostLabelFromUrl(hit.policyUrl || hit.store);
-      const url = hit.policyUrl.trim() || `https://${hit.store.replace(/^https?:\/\//i, "").replace(/\/$/, "")}/`;
+      const website = hostLabelFromUrl(hit.store) || hostLabelFromUrl(hit.policyUrl);
+      const url = scoutierSourceUrl(hit);
       return [hit.email, website, url].map(csvCell).join(",");
     }),
   ];

@@ -51,4 +51,28 @@ describe("policyHitsToScoutierCsv", () => {
     const hits = [{ store: "shop.com", policyUrl: "https://shop.com/p", email: "a@shop.com" }];
     expect(policyHitsToCsv(hits)).toEqual(["store,policy_url,email", "shop.com,https://shop.com/p,a@shop.com"]);
   });
+
+  it("writes the store host when Shopify returned a checkout policy URL", () => {
+    expect(
+      policyHitsToScoutierCsv([
+        {
+          store: "colourpop.com",
+          policyUrl: "https://checkout.shopify.com/c/123",
+          email: "hello@colourpop.com",
+        },
+      ]),
+    ).toEqual(["email,website,url", "hello@colourpop.com,colourpop.com,https://colourpop.com/"]);
+  });
+
+  it("writes the store host when Shopify returned a Shop app policy URL", () => {
+    expect(
+      policyHitsToScoutierCsv([
+        {
+          store: "glow.com",
+          policyUrl: "https://glow.shop.app/policies/privacy-policy",
+          email: "hi@glow.com",
+        },
+      ]),
+    ).toEqual(["email,website,url", "hi@glow.com,glow.com,https://glow.com/"]);
+  });
 });

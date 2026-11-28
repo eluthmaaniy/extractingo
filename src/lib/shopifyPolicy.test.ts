@@ -118,6 +118,45 @@ describe("readStorePolicy", () => {
     expect(result.store).toBe("demo-shop.myshopify.com");
   });
 
+  it("does not keep a checkout.shopify.com policy URL", async () => {
+    const fetchImpl = (async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.endsWith("/meta.json")) throw new Error("meta.json is only for a failed direct read");
+      return jsonResponse({
+        data: {
+          shop: {
+            privacyPolicy: {
+              url: "https://checkout.shopify.com/c/123",
+              body: "Write privacy@colourpop.com",
+            },
+          },
+          page: null,
+        },
+      });
+    }) as typeof fetch;
+    const result = await readStorePolicy("https://colourpop.com/policies/privacy-policy", fetchImpl);
+    expect(result.status).toBe("ok");
+    expect(result.policyUrl).toBe("https://colourpop.com/policies/privacy-policy");
+    expect(result.emails).toEqual(["privacy@colourpop.com"]);
+  });
+
+  it("prefers the storefront page URL over a checkout policy URL", async () => {
+    const fetchImpl = (async () =>
+      jsonResponse({
+        data: {
+          shop: {
+            privacyPolicy: {
+              url: "https://checkout.shopify.com/c/123",
+              body: "Write privacy@colourpop.com",
+            },
+          },
+          page: { body: null, onlineStoreUrl: "https://colourpop.com/policies/privacy-policy" },
+        },
+      })) as typeof fetch;
+    const result = await readStorePolicy("https://colourpop.com", fetchImpl);
+    expect(result.policyUrl).toBe("https://colourpop.com/policies/privacy-policy");
+  });
+
   it("reports a Shopify block", async () => {
     const fetchImpl = (async (input: RequestInfo | URL) => {
       if (String(input).endsWith("/meta.json")) return jsonResponse({ myshopify_domain: "demo.myshopify.com" });

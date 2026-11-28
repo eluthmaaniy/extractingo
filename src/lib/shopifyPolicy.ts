@@ -1,4 +1,4 @@
-import { emailsInText } from "@/lib/policyHtml";
+import { emailsInText, storefrontPolicyUrl } from "@/lib/policyHtml";
 
 /** Storefront API version confirmed readable from a normal browser page. */
 export const SHOPIFY_API_VERSION = "2026-10";
@@ -60,7 +60,7 @@ function fromPolicy(store: string, origin: string, payload: PolicyPayload): Shop
   const text = [policy?.body, page?.body].filter((part): part is string => Boolean(part)).join("\n");
   if (!text) return emptyRead(store, "no-policy", "This store has no privacy policy published.");
 
-  const policyUrl = policy?.url || page?.onlineStoreUrl || `${origin}/policies/privacy-policy`;
+  const policyUrl = storefrontPolicyUrl(origin, [policy?.url, page?.onlineStoreUrl]);
   const emails = emailsInText(text);
   if (emails.length === 0) {
     return { store, policyUrl, emails, status: "no-emails", detail: "The privacy policy has no email address." };
